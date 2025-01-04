@@ -2,8 +2,8 @@
 
 export default {
   content: [
-    "./assets/**/*",
-    "./*.php"
+    "./public/assets/**/*",
+    "./**/*.php"
     ],
   theme: {
     extend: {
