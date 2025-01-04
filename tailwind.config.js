@@ -15,7 +15,7 @@ export default {
         425: "425px",
       },
       fontFamily: {
-        poppins: ["Markazi Text", "serif"],
+        poppins: ["Noto Sans PhagsPa", "serif"],
       },
     },
   },
