@@ -55,15 +55,15 @@ $isLoggedIn = isset($_SESSION['user_id']);
             <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
             <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
                 <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
-                    <h3 class="text-lg leading-6 font-medium text-gray-900" id="modal-title">
+                    <h3 class="text-lg text-black leading-6 font-medium" id="modal-title">
                         Create New Project
                     </h3>
-                    <div class="mt-2">
-                        <input type="text" id="newProjectName" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" placeholder="Project Name">
+                    <div class="text-black mt-2">
+                        <input type="text" id="newProjectName" class="mt-1 block w-full rounded-md shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" placeholder="Project Name">
                         <textarea id="newProjectDescription" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" placeholder="Project Description"></textarea>
                         <div class="mt-2">
                             <label class="inline-flex items-center">
-                                <input type="checkbox" id="newProjectIsPublic" class="rounded border-gray-300 text-indigo-600 shadow-sm focus:border-indigo-300 focus:ring focus:ring-offset-0 focus:ring-indigo-200 focus:ring-opacity-50">
+                                <input type="checkbox" id="newProjectIsPublic" class="rounded text-indigo-600 shadow-sm focus:border-indigo-300 focus:ring focus:ring-offset-0 focus:ring-indigo-200 focus:ring-opacity-50">
                                 <span class="ml-2">Make project public</span>
                             </label>
                         </div>
