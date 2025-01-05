@@ -76,4 +76,6 @@ class ProjectController {
             return json_encode(['success' => false, 'message' => 'Failed to remove member']);
         }
     }
+
+    
 }

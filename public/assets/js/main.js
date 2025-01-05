@@ -23,7 +23,7 @@ function setupEventListeners() {
 
 async function fetchUserProjects() {
     try {
-        const response = await fetch('index?action=getUserProjects');
+        const response = await fetch('index.php?action=getUserProjects');
         const data = await response.json();
         if (data.success) {
             renderProjects(data.projects);
@@ -38,7 +38,7 @@ async function fetchUserProjects() {
 
 async function fetchPublicProjects() {
     try {
-        const response = await fetch('index?action=getPublicProjects');
+        const response = await fetch('index.php?action=getPublicProjects');
         const data = await response.json();
         if (data.success) {
             renderProjects(data.projects);
@@ -46,6 +46,7 @@ async function fetchPublicProjects() {
             alert(data.message);
         }
     } catch (error) {
+        console.error('Error:', error);
         alert('An error occurred while fetching public projects.');
     }
 }
@@ -79,7 +80,10 @@ function createProjectElement(project) {
     `;
 
     if (window.isLoggedIn) {
-        projectElement.querySelector('.viewTasksBtn').addEventListener('click', () => fetchTasks(project.id));
+        const viewTasksBtn = projectElement.querySelector('.viewTasksBtn');
+        if (viewTasksBtn) {
+            viewTasksBtn.addEventListener('click', () => fetchTasks(project.id));
+        }
     }
 
     return projectElement;
@@ -87,7 +91,7 @@ function createProjectElement(project) {
 
 async function fetchTasks(projectId) {
     try {
-        const response = await fetch(`index?action=getProjectTasks&project_id=${projectId}`);
+        const response = await fetch(`index.php?action=getProjectTasks&project_id=${projectId}`);
         const data = await response.json();
         if (data.success) {
             renderTasks(data.tasks, projectId);
@@ -174,7 +178,7 @@ async function createProject() {
     const isPublic = document.getElementById('newProjectIsPublic').checked;
 
     try {
-        const response = await fetch('index?action=createProject', {
+        const response = await fetch('index.php?action=createProject', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -201,7 +205,7 @@ async function createTask() {
     const status = document.getElementById('newTaskStatus').value;
 
     try {
-        const response = await fetch('index?action=createTask', {
+        const response = await fetch('index.php?action=createTask', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -223,12 +227,12 @@ async function createTask() {
 
 async function logout() {
     try {
-        const response = await fetch('index?action=logout', {
+        const response = await fetch('index.php?action=logout', {
             method: 'POST'
         });
         const data = await response.json();
         if (data.success) {
-            window.location.href = '/';
+            window.location.href = '../index.php';
         } else {
             alert(data.message);
         }

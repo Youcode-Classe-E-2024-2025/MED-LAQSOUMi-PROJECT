@@ -82,10 +82,10 @@
 
         async function logout() {
             try {
-                const response = await fetch('/?action=logout');
+                const response = await fetch('../index.php?action=logout');
                 const data = await response.json();
                 if (data.success) {
-                    window.location.href = '/login';
+                    window.location.href = './login.php';
                 } else {
                     alert(data.message);
                 }

@@ -48,7 +48,7 @@ if (isset($_GET['action'])) {
             }
             break;
         case 'logout':
-            if ($request_method === 'POST') {
+            if ($request_method === 'GET') {
                 echo $user_controller->logout();
             } else {
                 echo json_encode(['success' => false, 'message' => 'Invalid request method']);
