@@ -14,7 +14,7 @@ function setupEventListeners() {
 
 async function fetchProjects() {
     try {
-        const response = await fetch('/?action=getUserProjects');
+        const response = await fetch('index?action=getUserProjects');
         const data = await response.json();
         if (data.success) {
             renderProjects(data.projects);
@@ -65,7 +65,7 @@ function getColumnColor(column) {
 
 async function fetchTasks(projectId) {
     try {
-        const response = await fetch(`/?action=getProjectTasks&project_id=${projectId}`);
+        const response = await fetch(`index?action=getProjectTasks&project_id=${projectId}`);
         const data = await response.json();
         if (data.success) {
             renderTasks(data.tasks);
@@ -127,7 +127,7 @@ async function createProject() {
     const description = document.getElementById('newProjectDescription').value;
 
     try {
-        const response = await fetch('/?action=createProject', {
+        const response = await fetch('index?action=createProject', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -154,7 +154,7 @@ async function createTask() {
     const status = document.getElementById('newTaskStatus').value;
 
     try {
-        const response = await fetch('/?action=createTask', {
+        const response = await fetch('index?action=createTask', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -176,10 +176,10 @@ async function createTask() {
 
 async function logout() {
     try {
-        const response = await fetch('/?action=logout');
+        const response = await fetch('index?action=logout');
         const data = await response.json();
         if (data.success) {
-            window.location.href = '/login';
+            window.location.href = './login.php';
         } else {
             alert(data.message);
         }
