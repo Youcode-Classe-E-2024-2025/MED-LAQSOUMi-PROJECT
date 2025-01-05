@@ -33,7 +33,7 @@
             const password = document.getElementById('password').value;
             
             try {
-                const response = await fetch('/?action=login', {
+                const response = await fetch('../index.php?action=login', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -42,7 +42,7 @@
                 });
                 const data = await response.json();
                 if (data.success) {
-                    window.location.href = '/dashboard';
+                    window.location.href = './dashboard.php';
                 } else {
                     alert(data.message);
                 }

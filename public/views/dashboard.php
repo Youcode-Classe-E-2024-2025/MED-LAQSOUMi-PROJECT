@@ -48,7 +48,7 @@
 
         async function fetchProjects() {
             try {
-                const response = await fetch('/?action=getUserProjects');
+                const response = await fetch('../index.php?action=getUserProjects');
                 const data = await response.json();
                 if (data.success) {
                     renderProjects(data.projects);

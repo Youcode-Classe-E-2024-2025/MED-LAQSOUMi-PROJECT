@@ -1,92 +1,89 @@
 document.addEventListener('DOMContentLoaded', () => {
     fetchProjects();
+    setupEventListeners();
 });
+
+function setupEventListeners() {
+    document.getElementById('logoutBtn').addEventListener('click', logout);
+    document.getElementById('newProjectBtn').addEventListener('click', () => showModal('newProjectModal'));
+    document.getElementById('closeNewProjectModal').addEventListener('click', () => hideModal('newProjectModal'));
+    document.getElementById('createProjectBtn').addEventListener('click', createProject);
+    document.getElementById('closeNewTaskModal').addEventListener('click', () => hideModal('newTaskModal'));
+    document.getElementById('createTaskBtn').addEventListener('click', createTask);
+}
 
 async function fetchProjects() {
     try {
-        const response = await fetch('/index.php?action=getUserProjects', {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-        });
+        const response = await fetch('/?action=getUserProjects');
         const data = await response.json();
         if (data.success) {
             renderProjects(data.projects);
         } else {
-            console.error('Failed to fetch projects:', data.message);
-            showError('Failed to load projects. Please try again later.');
+            alert(data.message);
         }
     } catch (error) {
-        // console.error('Error fetching projects:', error);
-        showError('An error occurred while loading projects. Please try again later.');
+        console.error('Error:', error);
+        alert('An error occurred while fetching projects.');
     }
 }
 
 function renderProjects(projects) {
-    const projectList = document.querySelector('main');
-    projectList.innerHTML = '';
+    const projectContainer = document.getElementById('projectContainer');
+    projectContainer.innerHTML = '';
+    
+    const columns = ['TODO', 'DOING', 'REVIEW', 'DONE'];
+    
+    columns.forEach(column => {
+        const columnElement = document.createElement('section');
+        columnElement.className = 'bg-gray-800 rounded-lg shadow-md p-4';
+        columnElement.innerHTML = `
+            <h2 class="text-lg font-semibold mb-4 flex justify-between items-center">
+                <span>${column}</span>
+                <span class="text-sm font-normal bg-${getColumnColor(column)}-900 text-${getColumnColor(column)}-300 py-1 px-3 rounded-full">0</span>
+            </h2>
+            <div id="${column.toLowerCase()}-tasks" class="space-y-4">
+                <!-- Tasks will be dynamically inserted here -->
+            </div>
+        `;
+        projectContainer.appendChild(columnElement);
+    });
+
     projects.forEach(project => {
-        const projectElement = createProjectElement(project);
-        projectList.appendChild(projectElement);
+        fetchTasks(project.id);
     });
 }
 
-function createProjectElement(project) {
-    const projectElement = document.createElement('section');
-    projectElement.className = 'bg-gray-800 rounded-lg shadow-md p-4';
-    projectElement.innerHTML = `
-        <h2 class="text-lg font-semibold mb-4 flex justify-between items-center">
-            <span>${project.name}</span>
-        </h2>
-        <p class="text-gray-300 mb-4">${project.description}</p>
-        <button class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600" onclick="viewProject(${project.id})">View Tasks</button>
-    `;
-    return projectElement;
+function getColumnColor(column) {
+    switch (column) {
+        case 'TODO': return 'blue';
+        case 'DOING': return 'yellow';
+        case 'REVIEW': return 'purple';
+        case 'DONE': return 'green';
+        default: return 'gray';
+    }
 }
 
-async function viewProject(projectId) {
+async function fetchTasks(projectId) {
     try {
-        const response = await fetch(`index.php?action=getProjectTasks&project_id=${projectId}`, {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-        });
+        const response = await fetch(`/?action=getProjectTasks&project_id=${projectId}`);
         const data = await response.json();
         if (data.success) {
             renderTasks(data.tasks);
         } else {
-            console.error('Failed to fetch tasks:', data.message);
-            showError('Failed to load tasks. Please try again later.');
+            alert(data.message);
         }
     } catch (error) {
-        console.error('Error fetching tasks:', error);
-        showError('An error occurred while loading tasks. Please try again later.');
+        console.error('Error:', error);
+        alert('An error occurred while fetching tasks.');
     }
 }
 
 function renderTasks(tasks) {
-    const main = document.querySelector('main');
-    main.innerHTML = '';
-    const columns = ['TODO', 'DOING', 'REVIEW', 'DONE'];
-    
-    columns.forEach((status, index) => {
-        const column = document.createElement('section');
-        column.className = 'bg-gray-800 rounded-lg shadow-md p-4';
-        column.innerHTML = `
-            <h2 class="text-lg font-semibold mb-4 flex justify-between items-center">
-                <span>${status}</span>
-                <span class="text-sm font-normal bg-${getStatusColor(status)}-900 text-${getStatusColor(status)}-300 py-1 px-3 rounded-full">${tasks.filter(task => task.status === status).length}</span>
-            </h2>
-            <div class="space-y-4" id="${status.toLowerCase()}-tasks"></div>
-        `;
-        main.appendChild(column);
-    });
-
     tasks.forEach(task => {
         const taskElement = createTaskElement(task);
-        document.getElementById(`${task.status.toLowerCase()}-tasks`).appendChild(taskElement);
+        const columnElement = document.getElementById(`${task.status.toLowerCase()}-tasks`);
+        columnElement.appendChild(taskElement);
+        updateColumnCount(task.status);
     });
 }
 
@@ -95,8 +92,8 @@ function createTaskElement(task) {
     taskElement.className = 'bg-gray-700 border border-gray-600 rounded-lg p-4 shadow-sm';
     taskElement.innerHTML = `
         <div class="flex justify-between items-start mb-2">
-            <span class="px-2 py-1 text-xs font-semibold bg-${getPriorityColor(task.priority)}-900 text-${getPriorityColor(task.priority)}-300 rounded-full">${task.priority}</span>
-            <button class="text-gray-400 hover:text-gray-200" onclick="showTaskOptions(${task.id})">
+            <span class="px-2 py-1 text-xs font-semibold bg-${getColumnColor(task.status)}-900 text-${getColumnColor(task.status)}-300 rounded-full">${task.status}</span>
+            <button class="text-gray-400 hover:text-gray-200">
                 <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z"></path></svg>
             </button>
         </div>
@@ -110,43 +107,85 @@ function createTaskElement(task) {
     return taskElement;
 }
 
-function getPriorityColor(priority) {
-    switch (priority) {
-        case 'HIGH':
-            return 'red';
-        case 'MEDIUM':
-            return 'yellow';
-        case 'LOW':
-            return 'green';
-        default:
-            return 'blue';
+function updateColumnCount(status) {
+    const columnElement = document.querySelector(`h2:has(span:first-child:contains('${status}'))`);
+    const countElement = columnElement.querySelector('span:last-child');
+    const currentCount = parseInt(countElement.textContent);
+    countElement.textContent = currentCount + 1;
+}
+
+function showModal(modalId) {
+    document.getElementById(modalId).classList.remove('hidden');
+}
+
+function hideModal(modalId) {
+    document.getElementById(modalId).classList.add('hidden');
+}
+
+async function createProject() {
+    const name = document.getElementById('newProjectName').value;
+    const description = document.getElementById('newProjectDescription').value;
+
+    try {
+        const response = await fetch('/?action=createProject', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ name, description }),
+        });
+        const data = await response.json();
+        if (data.success) {
+            hideModal('newProjectModal');
+            fetchProjects();
+        } else {
+            alert(data.message);
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert('An error occurred while creating the project.');
     }
 }
 
-function getStatusColor(status) {
-    switch (status) {
-        case 'TODO':
-            return 'blue';
-        case 'DOING':
-            return 'yellow';
-        case 'REVIEW':
-            return 'purple';
-        case 'DONE':
-            return 'green';
-        default:
-            return 'gray';
+async function createTask() {
+    const projectId = document.getElementById('newTaskProjectId').value;
+    const title = document.getElementById('newTaskTitle').value;
+    const description = document.getElementById('newTaskDescription').value;
+    const status = document.getElementById('newTaskStatus').value;
+
+    try {
+        const response = await fetch('/?action=createTask', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ project_id: projectId, title, description, status }),
+        });
+        const data = await response.json();
+        if (data.success) {
+            hideModal('newTaskModal');
+            fetchTasks(projectId);
+        } else {
+            alert(data.message);
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert('An error occurred while creating the task.');
     }
 }
 
-function showTaskOptions(taskId) {
-    console.log('Show options for task:', taskId);
-    // Implement task options (e.g., edit, delete, change status)
+async function logout() {
+    try {
+        const response = await fetch('/?action=logout');
+        const data = await response.json();
+        if (data.success) {
+            window.location.href = '/login';
+        } else {
+            alert(data.message);
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert('An error occurred while logging out.');
+    }
 }
 
-function showError(message) {
-    const errorElement = document.createElement('div');
-    errorElement.className = 'bg-red-500 text-white p-4 rounded-md mb-4';
-    errorElement.textContent = message;
-    document.querySelector('main').prepend(errorElement);
-    setTimeout(() => errorElement.remove(), 5000);
-}
