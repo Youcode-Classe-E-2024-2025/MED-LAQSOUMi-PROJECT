@@ -1,48 +1,53 @@
 <?php
 
-require_once __DIR__ . '/../models/Project.php';
+require_once __DIR__ . '/../config/database.php';
 
-class ProjectController {
-    private $project;
+class Project {
+    private $db;
 
     public function __construct() {
-        $this->project = new Project();
+        $this->db = new Database();
     }
 
     public function create($name, $description, $user_id, $is_public = false) {
-        $result = $this->project->create($name, $description, $user_id, $is_public);
-        if ($result) {
-            return json_encode(['success' => true, 'message' => 'Project created successfully']);
-        } else {
-            return json_encode(['success' => false, 'message' => 'Failed to create project']);
-        }
+        $sql = "INSERT INTO projects (name, description, user_id, is_public) VALUES (?, ?, ?, ?)";
+        $params = [$name, $description, $user_id, $is_public ? 1 : 0];
+        $stmt = $this->db->query($sql, $params);
+        return $stmt->affected_rows > 0;
     }
 
     public function read($id) {
-        $project = $this->project->read($id);
-        if ($project) {
-            return json_encode(['success' => true, 'project' => $project]);
-        } else {
-            return json_encode(['success' => false, 'message' => 'Project not found']);
-        }
+        $sql = "SELECT * FROM projects WHERE id = ?";
+        $stmt = $this->db->query($sql, [$id]);
+        $result = $stmt->get_result();
+        return $result->fetch_assoc();
     }
 
     public function update($id, $name, $description, $is_public) {
-        $result = $this->project->update($id, $name, $description, $is_public);
-        if ($result) {
-            return json_encode(['success' => true, 'message' => 'Project updated successfully']);
-        } else {
-            return json_encode(['success' => false, 'message' => 'Failed to update project']);
-        }
+        $sql = "UPDATE projects SET name = ?, description = ?, is_public = ? WHERE id = ?";
+        $params = [$name, $description, $is_public ? 1 : 0, $id];
+        $stmt = $this->db->query($sql, $params);
+        return $stmt->affected_rows > 0;
     }
 
     public function delete($id) {
-        $result = $this->project->delete($id);
-        if ($result) {
-            return json_encode(['success' => true, 'message' => 'Project deleted successfully']);
-        } else {
-            return json_encode(['success' => false, 'message' => 'Failed to delete project']);
-        }
+        $sql = "DELETE FROM projects WHERE id = ?";
+        $stmt = $this->db->query($sql, [$id]);
+        return $stmt->affected_rows > 0;
+    }
+
+    public function getUserProjects($user_id) {
+        $sql = "SELECT * FROM projects WHERE user_id = ?";
+        $stmt = $this->db->query($sql, [$user_id]);
+        $result = $stmt->get_result();
+        return $result->fetch_all(MYSQLI_ASSOC);
+    }
+
+    public function getPublicProjects() {
+        $sql = "SELECT * FROM projects WHERE is_public = 1";
+        $stmt = $this->db->query($sql);
+        $result = $stmt->get_result();
+        return $result->fetch_all(MYSQLI_ASSOC);
     }
 
     public function getUserProjects($user_id) {
