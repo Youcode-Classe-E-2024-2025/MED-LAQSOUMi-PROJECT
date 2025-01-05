@@ -85,7 +85,7 @@
                 const response = await fetch('../index.php?action=logout');
                 const data = await response.json();
                 if (data.success) {
-                    window.location.href = './login.php';
+                    window.location.href = '../index.php';
                 } else {
                     alert(data.message);
                 }
