@@ -1,7 +1,5 @@
 <?php
-
 require_once __DIR__ . '/../models/User.php';
-
 class UserController {
     private $userModel;
 
@@ -32,6 +30,4 @@ class UserController {
         session_destroy();
         return json_encode(['success' => true, 'message' => 'Logout successful']);
     }
-
-    // Add more methods as needed
 }
