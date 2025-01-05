@@ -1,7 +1,9 @@
 document.addEventListener('DOMContentLoaded', () => {
     setupEventListeners();
     if (window.isLoggedIn) {
-        fetchProjects();
+        fetchUserProjects();
+    } else {
+        fetchPublicProjects();
     }
 });
 
@@ -19,9 +21,9 @@ function setupEventListeners() {
     }
 }
 
-async function fetchProjects() {
+async function fetchUserProjects() {
     try {
-        const response = await fetch('/?action=getUserProjects');
+        const response = await fetch('index?action=getUserProjects');
         const data = await response.json();
         if (data.success) {
             renderProjects(data.projects);
@@ -34,48 +36,61 @@ async function fetchProjects() {
     }
 }
 
+async function fetchPublicProjects() {
+    try {
+        const response = await fetch('index?action=getPublicProjects');
+        const data = await response.json();
+        if (data.success) {
+            renderProjects(data.projects);
+        } else {
+            alert(data.message);
+        }
+    } catch (error) {
+        alert('An error occurred while fetching public projects.');
+    }
+}
+
 function renderProjects(projects) {
     const projectContainer = document.getElementById('projectContainer');
     projectContainer.innerHTML = '';
     
-    const columns = ['TODO', 'DOING', 'REVIEW', 'DONE'];
-    
-    columns.forEach(column => {
-        const columnElement = document.createElement('section');
-        columnElement.className = 'bg-gray-800 rounded-lg shadow-md p-4';
-        columnElement.innerHTML = `
-            <h2 class="text-lg font-semibold mb-4 flex justify-between items-center">
-                <span>${column}</span>
-                <span class="text-sm font-normal bg-${getColumnColor(column)}-900 text-${getColumnColor(column)}-300 py-1 px-3 rounded-full">0</span>
-            </h2>
-            <div id="${column.toLowerCase()}-tasks" class="space-y-4">
-                <!-- Tasks will be dynamically inserted here -->
-            </div>
-        `;
-        projectContainer.appendChild(columnElement);
-    });
-
     projects.forEach(project => {
-        fetchTasks(project.id);
+        const projectElement = createProjectElement(project);
+        projectContainer.appendChild(projectElement);
     });
 }
 
-function getColumnColor(column) {
-    switch (column) {
-        case 'TODO': return 'blue';
-        case 'DOING': return 'yellow';
-        case 'REVIEW': return 'purple';
-        case 'DONE': return 'green';
-        default: return 'gray';
+function createProjectElement(project) {
+    const projectElement = document.createElement('div');
+    projectElement.className = 'bg-gray-800 rounded-lg shadow-md p-4';
+    projectElement.innerHTML = `
+        <h2 class="text-lg font-semibold mb-4">${project.name}</h2>
+        <p class="text-sm text-gray-400 mb-4">${project.description}</p>
+        <div class="flex justify-between items-center">
+            <span class="text-xs font-semibold inline-block py-1 px-2 uppercase rounded-full text-indigo-600 bg-indigo-200">
+                ${project.is_public ? 'Public' : 'Private'}
+            </span>
+            ${window.isLoggedIn ? `
+                <button class="viewTasksBtn px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-50" data-project-id="${project.id}">
+                    View Tasks
+                </button>
+            ` : ''}
+        </div>
+    `;
+
+    if (window.isLoggedIn) {
+        projectElement.querySelector('.viewTasksBtn').addEventListener('click', () => fetchTasks(project.id));
     }
+
+    return projectElement;
 }
 
 async function fetchTasks(projectId) {
     try {
-        const response = await fetch(`/?action=getProjectTasks&project_id=${projectId}`);
+        const response = await fetch(`index?action=getProjectTasks&project_id=${projectId}`);
         const data = await response.json();
         if (data.success) {
-            renderTasks(data.tasks);
+            renderTasks(data.tasks, projectId);
         } else {
             alert(data.message);
         }
@@ -85,40 +100,54 @@ async function fetchTasks(projectId) {
     }
 }
 
-function renderTasks(tasks) {
+function renderTasks(tasks, projectId) {
+    const projectElement = document.querySelector(`[data-project-id="${projectId}"]`).closest('.bg-gray-800');
+    const tasksContainer = document.createElement('div');
+    tasksContainer.className = 'mt-4 space-y-2';
+    
     tasks.forEach(task => {
         const taskElement = createTaskElement(task);
-        const columnElement = document.getElementById(`${task.status.toLowerCase()}-tasks`);
-        columnElement.appendChild(taskElement);
-        updateColumnCount(task.status);
+        tasksContainer.appendChild(taskElement);
     });
+
+    const addTaskBtn = document.createElement('button');
+    addTaskBtn.className = 'mt-4 px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50';
+    addTaskBtn.textContent = 'Add Task';
+    addTaskBtn.addEventListener('click', () => showNewTaskModal(projectId));
+
+    projectElement.appendChild(tasksContainer);
+    projectElement.appendChild(addTaskBtn);
 }
 
 function createTaskElement(task) {
     const taskElement = document.createElement('div');
-    taskElement.className = 'bg-gray-700 border border-gray-600 rounded-lg p-4 shadow-sm';
+    taskElement.className = 'bg-gray-700 rounded-lg p-3';
     taskElement.innerHTML = `
-        <div class="flex justify-between items-start mb-2">
-            <span class="px-2 py-1 text-xs font-semibold bg-${getColumnColor(task.status)}-900 text-${getColumnColor(task.status)}-300 rounded-full">${task.status}</span>
-            <button class="text-gray-400 hover:text-gray-200">
-                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z"></path></svg>
+        <h3 class="font-medium">${task.title}</h3>
+        <p class="text-sm text-gray-400">${task.description}</p>
+        <div class="mt-2 flex justify-between items-center">
+            <span class="text-xs font-semibold inline-block py-1 px-2 uppercase rounded-full text-${getStatusColor(task.status)}-600 bg-${getStatusColor(task.status)}-200">
+                ${task.status}
+            </span>
+            <button class="updateStatusBtn px-2 py-1 bg-indigo-600 text-white text-xs rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-50" data-task-id="${task.id}">
+                Update Status
             </button>
         </div>
-        <h3 class="font-medium mb-2">${task.title}</h3>
-        <p class="text-sm text-gray-400 mb-2">${task.description}</p>
-        <div class="flex items-center text-sm text-gray-400">
-            <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd"></path></svg>
-            <span>${new Date(task.created_at).toLocaleDateString()}</span>
-        </div>
     `;
+
+    taskElement.querySelector('.updateStatusBtn').addEventListener('click', () => showUpdateStatusModal(task));
+
     return taskElement;
 }
 
-function updateColumnCount(status) {
-    const columnElement = document.querySelector(`h2:has(span:first-child:contains('${status}'))`);
-    const countElement = columnElement.querySelector('span:last-child');
-    const currentCount = parseInt(countElement.textContent);
-    countElement.textContent = currentCount + 1;
+function getStatusColor(status) {
+    switch (status.toLowerCase()) {
+        case 'todo': return 'blue';
+        case 'doing': return 'yellow';
+        case 'review': return 'purple';
+        case 'done': return 'green';
+        default: return 'gray';
+    }
 }
 
 function showModal(modalId) {
@@ -129,22 +158,33 @@ function hideModal(modalId) {
     document.getElementById(modalId).classList.add('hidden');
 }
 
+function showNewTaskModal(projectId) {
+    document.getElementById('newTaskProjectId').value = projectId;
+    showModal('newTaskModal');
+}
+
+function showUpdateStatusModal(task) {
+    // Implement the update status modal
+    alert('Update status functionality not implemented yet.');
+}
+
 async function createProject() {
     const name = document.getElementById('newProjectName').value;
     const description = document.getElementById('newProjectDescription').value;
+    const isPublic = document.getElementById('newProjectIsPublic').checked;
 
     try {
-        const response = await fetch('/?action=createProject', {
+        const response = await fetch('index?action=createProject', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ name, description }),
+            body: JSON.stringify({ name, description, is_public: isPublic }),
         });
         const data = await response.json();
         if (data.success) {
             hideModal('newProjectModal');
-            fetchProjects();
+            fetchUserProjects();
         } else {
             alert(data.message);
         }
@@ -161,7 +201,7 @@ async function createTask() {
     const status = document.getElementById('newTaskStatus').value;
 
     try {
-        const response = await fetch('/?action=createTask', {
+        const response = await fetch('index?action=createTask', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -183,12 +223,12 @@ async function createTask() {
 
 async function logout() {
     try {
-        const response = await fetch('index.php?action=logout', {
+        const response = await fetch('index?action=logout', {
             method: 'POST'
         });
         const data = await response.json();
         if (data.success) {
-            window.location.href = 'index.php';
+            window.location.href = '/';
         } else {
             alert(data.message);
         }
