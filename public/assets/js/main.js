@@ -228,11 +228,11 @@ async function createTask() {
 async function logout() {
     try {
         const response = await fetch('index.php?action=logout', {
-            method: 'POST'
+            method: 'GET'
         });
         const data = await response.json();
         if (data.success) {
-            window.location.href = '../index.php';
+            window.location.href = 'index.php';
         } else {
             alert(data.message);
         }
