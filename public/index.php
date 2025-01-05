@@ -7,7 +7,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+PhagsPa&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="./assets/css/style.css">
-    <title>KANBAN</title>
+    <title>Kanban</title>
 </head>
 <body class="font-poppins bg-gradient-to-tr from-gray-800 via-gray-900 to-black min-h-screen text-white">
     <div class="container mx-auto px-4 py-8">

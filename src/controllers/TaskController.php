@@ -12,7 +12,6 @@ class TaskController {
     }
 
     public function create($projectId, $title, $description, $status, $priority, $assignedTo, $createdBy) {
-        // Add validation here
         $taskId = $this->taskModel->create($projectId, $title, $description, $status, $priority, $assignedTo, $createdBy);
         if ($taskId) {
             return json_encode(['success' => true, 'task_id' => $taskId]);
