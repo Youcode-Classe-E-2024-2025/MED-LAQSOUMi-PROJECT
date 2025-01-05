@@ -1,20 +1,27 @@
 document.addEventListener('DOMContentLoaded', () => {
-    fetchProjects();
     setupEventListeners();
+    if (window.isLoggedIn) {
+        fetchProjects();
+    }
 });
 
 function setupEventListeners() {
-    document.getElementById('logoutBtn').addEventListener('click', logout);
-    document.getElementById('newProjectBtn').addEventListener('click', () => showModal('newProjectModal'));
-    document.getElementById('closeNewProjectModal').addEventListener('click', () => hideModal('newProjectModal'));
-    document.getElementById('createProjectBtn').addEventListener('click', createProject);
-    document.getElementById('closeNewTaskModal').addEventListener('click', () => hideModal('newTaskModal'));
-    document.getElementById('createTaskBtn').addEventListener('click', createTask);
+    if (window.isLoggedIn) {
+        document.getElementById('logoutBtn').addEventListener('click', logout);
+        document.getElementById('newProjectBtn').addEventListener('click', () => showModal('newProjectModal'));
+        document.getElementById('closeNewProjectModal').addEventListener('click', () => hideModal('newProjectModal'));
+        document.getElementById('createProjectBtn').addEventListener('click', createProject);
+        document.getElementById('closeNewTaskModal').addEventListener('click', () => hideModal('newTaskModal'));
+        document.getElementById('createTaskBtn').addEventListener('click', createTask);
+    } else {
+        document.getElementById('loginBtn').addEventListener('click', () => window.location.href = 'views/login.php');
+        document.getElementById('registerBtn').addEventListener('click', () => window.location.href = 'views/register.php');
+    }
 }
 
 async function fetchProjects() {
     try {
-        const response = await fetch('index?action=getUserProjects');
+        const response = await fetch('/?action=getUserProjects');
         const data = await response.json();
         if (data.success) {
             renderProjects(data.projects);
@@ -65,7 +72,7 @@ function getColumnColor(column) {
 
 async function fetchTasks(projectId) {
     try {
-        const response = await fetch(`index?action=getProjectTasks&project_id=${projectId}`);
+        const response = await fetch(`/?action=getProjectTasks&project_id=${projectId}`);
         const data = await response.json();
         if (data.success) {
             renderTasks(data.tasks);
@@ -127,7 +134,7 @@ async function createProject() {
     const description = document.getElementById('newProjectDescription').value;
 
     try {
-        const response = await fetch('index?action=createProject', {
+        const response = await fetch('/?action=createProject', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -154,7 +161,7 @@ async function createTask() {
     const status = document.getElementById('newTaskStatus').value;
 
     try {
-        const response = await fetch('index?action=createTask', {
+        const response = await fetch('/?action=createTask', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -176,10 +183,12 @@ async function createTask() {
 
 async function logout() {
     try {
-        const response = await fetch('index?action=logout');
+        const response = await fetch('index.php?action=logout', {
+            method: 'POST'
+        });
         const data = await response.json();
         if (data.success) {
-            window.location.href = './login.php';
+            window.location.href = 'index.php';
         } else {
             alert(data.message);
         }

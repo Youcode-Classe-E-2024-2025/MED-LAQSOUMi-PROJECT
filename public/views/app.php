@@ -1,10 +1,6 @@
 <?php
-// Check if the user is logged in
 session_start();
-if (!isset($_SESSION['user_id'])) {
-    header('Location: ./views/login.php');
-    exit;
-}
+$isLoggedIn = isset($_SESSION['user_id']);
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -28,13 +24,22 @@ if (!isset($_SESSION['user_id'])) {
                     <h1 class="text-2xl font-bold text-gray-200">Team Project Board</h1>
                 </div>
                 <div class="flex items-center space-x-4">
-                    <input id="search" class="px-4 py-2 rounded-full bg-gray-700 text-white focus:outline-none focus:ring focus:border-blue-300" type="search" placeholder="Search for anything…">
-                    <button id="newProjectBtn" class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-50">
-                        New Project
-                    </button>
-                    <button id="logoutBtn" class="p-2 rounded-full bg-gray-700 hover:bg-gray-600 focus:outline-none focus:ring focus:border-blue-300">
-                        <svg class="w-5 h-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M3 3a1 1 0 00-1 1v12a1 1 0 102 0V4a1 1 0 00-1-1zm10.293 9.293a1 1 0 001.414 1.414l3-3a1 1 0 000-1.414l-3-3a1 1 0 10-1.414 1.414L14.586 9H7a1 1 0 100 2h7.586l-1.293 1.293z" clip-rule="evenodd"></path></svg>
-                    </button>
+                    <?php if ($isLoggedIn): ?>
+                        <input id="search" class="px-4 py-2 rounded-full bg-gray-700 text-white focus:outline-none focus:ring focus:border-blue-300" type="search" placeholder="Search for anything…">
+                        <button id="newProjectBtn" class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-50">
+                            New Project
+                        </button>
+                        <button id="logoutBtn" class="p-2 rounded-full bg-gray-700 hover:bg-gray-600 focus:outline-none focus:ring focus:border-blue-300">
+                            <svg class="w-5 h-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M3 3a1 1 0 00-1 1v12a1 1 0 102 0V4a1 1 0 00-1-1zm10.293 9.293a1 1 0 001.414 1.414l3-3a1 1 0 000-1.414l-3-3a1 1 0 10-1.414 1.414L14.586 9H7a1 1 0 100 2h7.586l-1.293 1.293z" clip-rule="evenodd"></path></svg>
+                        </button>
+                    <?php else: ?>
+                        <button id="loginBtn" class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-50">
+                            Login
+                        </button>
+                        <button id="registerBtn" class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50">
+                            Register
+                        </button>
+                    <?php endif; ?>
                 </div>
             </div>
         </header>
@@ -105,6 +110,9 @@ if (!isset($_SESSION['user_id'])) {
         </div>
     </div>
 
+    <script>
+        window.isLoggedIn = <?php echo json_encode($isLoggedIn); ?>;
+    </script>
     <script src="assets/js/main.js"></script>
 </body>
 </html>
