@@ -4,12 +4,30 @@ require_once __DIR__ . '/../src/controllers/UserController.php';
 require_once __DIR__ . '/../src/controllers/ProjectController.php';
 require_once __DIR__ . '/../src/controllers/TaskController.php';
 
-$request_method = $_SERVER['REQUEST_METHOD'];
-$request_uri = $_SERVER['REQUEST_URI'];
-
 $user_controller = new UserController();
 $project_controller = new ProjectController();
 $task_controller = new TaskController();
+
+if (isset($_GET['action'])) {
+    header('Content-Type: application/json');
+    
+    switch ($_GET['action']) {
+        case 'getUserProjects':
+            echo $project_controller->getUserProjects($_SESSION['user_id']);
+            break;
+        case 'getProjectTasks':
+            if (isset($_GET['project_id'])) {
+                echo $task_controller->read($_GET['project_id']);
+            } else {
+                echo json_encode(['success' => false, 'message' => 'Project ID is required']);
+            }
+            break;
+        // Add other actions as needed
+        default:
+            echo json_encode(['success' => false, 'message' => 'Invalid action']);
+    }
+    exit;
+}
 
 // API routes
 if (strpos($request_uri, '/api/') === 0) {
@@ -38,9 +56,7 @@ if (strpos($request_uri, '/api/') === 0) {
         } elseif (preg_match('/^\/api\/projects\/(\d+)\/tasks$/', $request_uri, $matches)) {
             $project_id = $matches[1];
             echo $task_controller->read($project_id);
-        } elseif ($request_uri === '/api/user/projects') {
-            echo $project_controller->getUserProjects($_SESSION['user_id']);
-        }
+        } 
     } elseif ($request_method === 'PUT') {
         if (preg_match('/^\/api\/tasks\/(\d+)\/status$/', $request_uri, $matches)) {
             $task_id = $matches[1];
@@ -51,5 +67,5 @@ if (strpos($request_uri, '/api/') === 0) {
     exit;
 }
 
-// For all non-API routes, serve the main application
+// For all non-API requests, serve the main application
 include __DIR__ . '/views/app.php';
