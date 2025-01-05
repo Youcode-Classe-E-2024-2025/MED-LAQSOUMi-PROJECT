@@ -48,19 +48,7 @@
                             <span>Dec 12</span>
                         </div>
                     </div>
-                    <div class="bg-gray-700 border border-gray-600 rounded-lg p-4 shadow-sm">
-                        <div class="flex justify-between items-start mb-2">
-                            <span class="px-2 py-1 text-xs font-semibold bg-green-900 text-green-300 rounded-full">Dev</span>
-                            <button class="text-gray-400 hover:text-gray-200">
-                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z"></path></svg>
-                            </button>
-                        </div>
-                        <h3 class="font-medium mb-2">Set up development environment</h3>
-                        <div class="flex items-center text-sm text-gray-400">
-                            <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd"></path></svg>
-                            <span>Dec 14</span>
-                        </div>
-                    </div>
+                    <!-- More TODO tasks -->
                 </div>
             </section>
 
@@ -70,19 +58,7 @@
                     <span class="text-sm font-normal bg-yellow-900 text-yellow-300 py-1 px-3 rounded-full">2</span>
                 </h2>
                 <div class="space-y-4">
-                    <div class="bg-gray-700 border border-gray-600 rounded-lg p-4 shadow-sm">
-                        <div class="flex justify-between items-start mb-2">
-                            <span class="px-2 py-1 text-xs font-semibold bg-yellow-900 text-yellow-300 rounded-full">In Progress</span>
-                            <button class="text-gray-400 hover:text-gray-200">
-                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z"></path></svg>
-                            </button>
-                        </div>
-                        <h3 class="font-medium mb-2">Implement user authentication</h3>
-                        <div class="flex items-center text-sm text-gray-400">
-                            <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd"></path></svg>
-                            <span>Dec 15</span>
-                        </div>
-                    </div>
+                    <!-- DOING tasks -->
                 </div>
             </section>
 
@@ -92,19 +68,7 @@
                     <span class="text-sm font-normal bg-purple-900 text-purple-300 py-1 px-3 rounded-full">2</span>
                 </h2>
                 <div class="space-y-4">
-                    <div class="bg-gray-700 border border-gray-600 rounded-lg p-4 shadow-sm">
-                        <div class="flex justify-between items-start mb-2">
-                            <span class="px-2 py-1 text-xs font-semibold bg-purple-900 text-purple-300 rounded-full">QA</span>
-                            <button class="text-gray-400 hover:text-gray-200">
-                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z"></path></svg>
-                            </button>
-                        </div>
-                        <h3 class="font-medium mb-2">Review homepage design</h3>
-                        <div class="flex items-center text-sm text-gray-400">
-                            <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd"></path></svg>
-                            <span>Dec 18</span>
-                        </div>
-                    </div>
+                    <!-- REVIEW tasks -->
                 </div>
             </section>
 
@@ -114,22 +78,11 @@
                     <span class="text-sm font-normal bg-green-900 text-green-300 py-1 px-3 rounded-full">1</span>
                 </h2>
                 <div class="space-y-4">
-                    <div class="bg-gray-700 border border-gray-600 rounded-lg p-4 shadow-sm">
-                        <div class="flex justify-between items-start mb-2">
-                            <span class="px-2 py-1 text-xs font-semibold bg-blue-900 text-blue-300 rounded-full">Complete</span>
-                            <button class="text-gray-400 hover:text-gray-200">
-                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z"></path></svg>
-                            </button>
-                        </div>
-                        <h3 class="font-medium mb-2">Project kickoff meeting</h3>
-                        <div class="flex items-center text-sm text-gray-400">
-                            <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd"></path></svg>
-                            <span>Dec 10</span>
-                        </div>
-                    </div>
+                    <!-- DONE tasks -->
                 </div>
             </section>
         </main>
     </div>
+    <script src="/assets/js/main.js"></script>
 </body>
 </html>
