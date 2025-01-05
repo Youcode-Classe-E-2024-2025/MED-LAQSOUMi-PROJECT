@@ -78,16 +78,9 @@ class Project {
     }
 
     public function getPublicProjects() {
-        try {
-            $query = "SELECT * FROM projects WHERE is_public = :is_public";
-            $stmt = $this->conn->prepare($query);
-            $stmt->bindValue(':is_public', true, PDO::PARAM_BOOL);
-            $stmt->execute();
-            return $stmt->fetchAll(PDO::FETCH_ASSOC);
-        } catch (PDOException $e) {
-            error_log("Error in getPublicProjects: " . $e->getMessage());
-            return false;
-        }
+        $sql = "SELECT * FROM projects WHERE is_public = 1";
+        $stmt = $this->db->query($sql);
+        $result = $stmt->get_result();
+        return $result->fetch_all(MYSQLI_ASSOC);
     }
-    
 }
