@@ -1,8 +1,8 @@
 <?php
-require_once 'models/User.php';
-require_once 'models/Role.php';
-require_once 'models/Permission.php';
-require_once 'includes/utils.php';
+require_once __DIR__ . '/../models/User.php';
+require_once __DIR__ . '/../models/Role.php';
+require_once __DIR__ . '/../models/Permission.php';
+require_once __DIR__ . '/../includes/utils.php';
 
 use Models\User;
 use Models\Role;
@@ -19,7 +19,45 @@ class AdminController {
         $this->permission = new Permission($db);
     }
 
-    // Existing methods remain unchanged
+    public function manageUsers() {
+        $users = $this->user->getAll();
+        require 'views/admin/manage_users.php';
+    }
+
+    public function manageRoles() {
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $action = $_POST['action'];
+            switch ($action) {
+                case 'create':
+                    $name = $_POST['name'];
+                    if ($this->role->create($name)) {
+                        setFlashMessage('success', "Role created successfully.");
+                    } else {
+                        setFlashMessage('error', "Failed to create role.");
+                    }
+                    break;
+                case 'update':
+                    $id = $_POST['id'];
+                    $name = $_POST['name'];
+                    if ($this->role->update($id, $name)) {
+                        setFlashMessage('success', "Role updated successfully.");
+                    } else {
+                        setFlashMessage('error', "Failed to update role.");
+                    }
+                    break;
+                case 'delete':
+                    $id = $_POST['id'];
+                    if ($this->role->delete($id)) {
+                        setFlashMessage('success', "Role deleted successfully.");
+                    } else {
+                        setFlashMessage('error', "Failed to delete role.");
+                    }
+                    break;
+            }
+        }
+        $roles = $this->role->getAll();
+        require 'views/admin/manage_roles.php';
+    }
 
     public function managePermissions() {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -70,7 +108,6 @@ class AdminController {
                     break;
             }
         }
-
         $permissions = $this->permission->getAll();
         $roles = $this->role->getAll();
         require 'views/admin/manage_permissions.php';

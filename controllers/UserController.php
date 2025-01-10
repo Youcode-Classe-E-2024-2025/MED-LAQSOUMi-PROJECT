@@ -1,32 +1,36 @@
 <?php
 require_once 'models/User.php';
 require_once 'models/Task.php';
+require_once 'models/Project.php';
 require_once 'includes/utils.php';
 
 use Models\User;
 use Models\Task;
+use Models\Project;
 
 class UserController {
     private $user;
     private $task;
+    private $project;
 
     public function __construct($db) {
         $this->user = new User($db);
         $this->task = new Task($db);
+        $this->project = new Project($db);
     }
 
     public function register() {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $name = $_POST['name'];
-            $email = $_POST['email'];
+            $name = trim($_POST['name']);
+            $email = trim($_POST['email']);
             $password = $_POST['password'];
 
             if (empty($name) || empty($email) || empty($password)) {
                 $error = "All fields are required.";
             } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
                 $error = "Invalid email format.";
-            } elseif (strlen($password) < 6) {
-                $error = "Password must be at least 6 characters long.";
+            } elseif (strlen($password) < 8) {
+                $error = "Password must be at least 8 characters long.";
             } else {
                 if ($this->user->create($name, $email, $password)) {
                     setFlashMessage('success', "Registration successful. Please log in.");
@@ -65,9 +69,67 @@ class UserController {
             header('Location: index.php?action=login');
             exit;
         }
-        $user = $this->user->getById($_SESSION['user_id']);
-        $assignedTasks = $this->task->getAssignedTasks($_SESSION['user_id']);
+        $user_id = $_SESSION['user_id'];
+        $user_role = $_SESSION['user_role'];
+
+        switch ($user_role) {
+            case 'admin':
+                $this->adminDashboard();
+                break;
+            case 'project_manager':
+                $this->managerDashboard($user_id);
+                break;
+            default:
+                $this->userDashboard($user_id);
+                break;
+        }
+    }
+
+    private function userDashboard($user_id) {
+        $taskStats = $this->task->getTaskStatistics($user_id);
+        $totalTasks = $taskStats['total_tasks'];
+        $completedTasks = $taskStats['completed_tasks'];
+        $completionRate = $totalTasks > 0 ? ($completedTasks / $totalTasks) * 100 : 0;
+
+        $projects = $this->project->getAssignedAndPublicProjects($user_id);
+
         require 'views/user/dashboard.php';
+    }
+
+    private function managerDashboard($user_id) {
+        $projects = $this->project->getByUserId($user_id);
+        $totalProjects = count($projects);
+        $completedProjects = 0;
+        $totalTasks = 0;
+        $completedTasks = 0;
+
+        foreach ($projects as $project) {
+            $projectProgress = $this->project->getProjectProgress($project['id']);
+            if ($projectProgress == 100) {
+                $completedProjects++;
+            }
+            $projectTasks = $this->task->getByProjectId($project['id']);
+            $totalTasks += count($projectTasks);
+            $completedTasks += count(array_filter($projectTasks, function($task) {
+                return $task['status'] === 'done';
+            }));
+        }
+
+        $projectCompletionRate = $totalProjects > 0 ? ($completedProjects / $totalProjects) * 100 : 0;
+        $taskCompletionRate = $totalTasks > 0 ? ($completedTasks / $totalTasks) * 100 : 0;
+
+        require 'views/manager/dashboard.php';
+    }
+
+    private function adminDashboard() {
+        $totalUsers = $this->user->getTotalUsers();
+        $totalProjects = $this->project->getTotalProjects();
+        $totalTasks = $this->task->getTotalTasks();
+
+        $projectManagers = $this->user->getUsersByRole('project_manager');
+        $recentActivities = $this->getRecentActivities(10); // Get 10 most recent activities
+
+        require 'views/admin/dashboard.php';
     }
 
     public function logout() {
@@ -127,17 +189,13 @@ class UserController {
         exit;
     }
 
-    public function getRecentActivity() {
+    private function getRecentActivities($limit) {
         // This is a placeholder. In a real application, you would fetch this data from your database.
-        $recentActivity = [
+        return [
             ['type' => 'Task Update', 'description' => 'Task "Implement login" marked as complete', 'date' => '2023-05-10 14:30:00'],
             ['type' => 'New Project', 'description' => 'Project "Website Redesign" created', 'date' => '2023-05-09 09:15:00'],
-            ['type' => 'Comment', 'description' => 'New comment on task "Fix navigation bug"', 'date' => '2023-05-08 16:45:00'],
+            ['type' => 'New User', 'description' => 'User "John Doe" registered', 'date' => '2023-05-08 16:45:00'],
         ];
-
-        header('Content-Type: application/json');
-        echo json_encode($recentActivity);
-        exit;
     }
 }
 

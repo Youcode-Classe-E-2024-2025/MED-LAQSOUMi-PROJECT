@@ -5,69 +5,75 @@ require_once 'config/database.php';
 require_once 'controllers/UserController.php';
 require_once 'controllers/ProjectController.php';
 require_once 'controllers/TaskController.php';
+require_once 'controllers/AdminController.php';
 
-$userController = new UserController($db);
-$projectController = new ProjectController($db);
-$taskController = new TaskController($db);
+try {
+    $userController = new UserController($db);
+    $projectController = new ProjectController($db);
+    $taskController = new TaskController($db);
+    $adminController = new AdminController($db);
 
-$action = $_GET['action'] ?? 'login';
+    $action = $_GET['action'] ?? 'home';
 
-if (!isLoggedIn() && !in_array($action, ['login', 'register'])) {
-    header('Location: index.php?action=login');
-    exit;
-}
-
-switch ($action) {
-    case 'register':
-    case 'login':
-    case 'logout':
-    case 'dashboard':
-        $userController->$action();
-        break;
-    case 'user_profile':
-        $userController->profile();
-        break;
-    case 'user_update_email':
-        $userController->updateEmail();
-        break;
-    case 'user_update_password':
-        $userController->updatePassword();
-        break;
-    case 'project_create':
-        $projectController->create();
-        break;
-    case 'project_list':
-        $projectController->list();
-        break;
-    case 'project_view':
-        $projectController->view($_GET['id'] ?? null);
-        break;
-    case 'project_edit':
-        $projectController->edit($_GET['id'] ?? null);
-        break;
-    case 'project_delete':
-        $projectController->delete($_GET['id'] ?? null);
-        break;
-    case 'task_create':
-        $taskController->create();
-        break;
-    case 'task_edit':
-        $taskController->edit($_GET['id'] ?? null);
-        break;
-    case 'task_delete':
-        $taskController->delete($_GET['id'] ?? null);
-        break;
-    case 'task_update_status':
-        $taskController->updateStatus();
-        break;
-    case 'assigned_tasks':
-        $taskController->assignedTasks();
-        break;
-    case 'kanban':
-        $taskController->kanban();
-        break;
-    default:
-        header('Location: index.php?action=dashboard');
-        exit;
+    switch ($action) {
+        case 'home':
+            // Show public projects for guests, dashboard for logged-in users
+            if (isLoggedIn()) {
+                $userController->dashboard();
+            } else {
+                $projectController->listPublic();
+            }
+            break;
+        case 'register':
+        case 'login':
+        case 'logout':
+            $userController->$action();
+            break;
+        case 'user_profile':
+            requireLogin();
+            $userController->profile();
+            break;
+        case 'user_update_email':
+        case 'user_update_password':
+            requireLogin();
+            $userController->$action();
+            break;
+        case 'project_create':
+        case 'project_edit':
+        case 'project_delete':
+        case 'project_view':
+        case 'project_list':
+            requireLogin();
+            $projectController->$action($_GET['id'] ?? null);
+            break;
+        case 'task_create':
+        case 'task_edit':
+        case 'task_delete':
+        case 'task_update_status':
+            requireLogin();
+            $taskController->$action($_GET['id'] ?? null);
+            break;
+        case 'manage_categories':
+        case 'manage_tags':
+            requireLogin();
+            $taskController->$action();
+            break;
+        case 'admin_dashboard':
+        case 'manage_users':
+        case 'manage_roles':
+        case 'manage_permissions':
+            requireAdmin();
+            $adminController->$action();
+            break;
+        default:
+            throw new Exception("Invalid action: $action");
+    }
+} catch (Exception $e) {
+    // Log the error
+    error_log($e->getMessage());
+    
+    // Display a user-friendly error message
+    $error = "An unexpected error occurred. Please try again later.";
+    require 'views/error.php';
 }
 

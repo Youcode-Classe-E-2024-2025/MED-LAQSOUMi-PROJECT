@@ -119,46 +119,115 @@
 
 
 
--- Create tables
-CREATE TABLE users (
+-- -- Create tables
+-- CREATE TABLE users (
+--     id INT AUTO_INCREMENT PRIMARY KEY,
+--     name VARCHAR(255) NOT NULL,
+--     email VARCHAR(255) NOT NULL UNIQUE,
+--     password VARCHAR(255) NOT NULL,
+--     role ENUM('admin', 'project_manager', 'team_member', 'guest') DEFAULT 'team_member'
+-- );
+
+-- CREATE TABLE projects (
+--     id INT AUTO_INCREMENT PRIMARY KEY,
+--     name VARCHAR(255) NOT NULL,
+--     description TEXT,
+--     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+--     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+--     user_id INT,
+--     is_public BOOLEAN DEFAULT FALSE,
+--     FOREIGN KEY (user_id) REFERENCES users(id)
+-- );
+
+-- CREATE TABLE tasks (
+--     id INT AUTO_INCREMENT PRIMARY KEY,
+--     title VARCHAR(255) NOT NULL,
+--     description TEXT,
+--     status ENUM('todo', 'in_progress', 'done') DEFAULT 'todo',
+--     type ENUM('basic', 'bug', 'feature') DEFAULT 'basic',
+--     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+--     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+--     project_id INT,
+--     assigned_to INT,
+--     FOREIGN KEY (project_id) REFERENCES projects(id),
+--     FOREIGN KEY (assigned_to) REFERENCES users(id)
+-- );
+
+-- CREATE TABLE tags (
+--     id INT AUTO_INCREMENT PRIMARY KEY,
+--     name VARCHAR(50) NOT NULL UNIQUE
+-- );
+
+-- CREATE TABLE task_tags (
+--     task_id INT,
+--     tag_id INT,
+--     PRIMARY KEY (task_id, tag_id),
+--     FOREIGN KEY (task_id) REFERENCES tasks(id) ON DELETE CASCADE,
+--     FOREIGN KEY (tag_id) REFERENCES tags(id) ON DELETE CASCADE
+-- );
+
+-- CREATE TABLE project_members (
+--     project_id INT,
+--     user_id INT,
+--     PRIMARY KEY (project_id, user_id),
+--     FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE,
+--     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+-- );
+
+-- CREATE TABLE activity_log (
+--     id INT AUTO_INCREMENT PRIMARY KEY,
+--     user_id INT,
+--     project_id INT,
+--     task_id INT,
+--     action VARCHAR(255) NOT NULL,
+--     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+--     FOREIGN KEY (user_id) REFERENCES users(id),
+--     FOREIGN KEY (project_id) REFERENCES projects(id),
+--     FOREIGN KEY (task_id) REFERENCES tasks(id)
+-- );
+
+
+
+CREATE TABLE IF NOT EXISTS users (
     id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
     email VARCHAR(255) NOT NULL UNIQUE,
     password VARCHAR(255) NOT NULL,
-    role ENUM('admin', 'project_manager', 'team_member', 'guest') DEFAULT 'team_member'
+    role ENUM('admin', 'project_manager', 'team_member', 'guest') NOT NULL DEFAULT 'team_member',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE TABLE projects (
+CREATE TABLE IF NOT EXISTS projects (
     id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
     description TEXT,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     user_id INT,
     is_public BOOLEAN DEFAULT FALSE,
-    FOREIGN KEY (user_id) REFERENCES users(id)
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
 );
 
-CREATE TABLE tasks (
+CREATE TABLE IF NOT EXISTS tasks (
     id INT AUTO_INCREMENT PRIMARY KEY,
     title VARCHAR(255) NOT NULL,
     description TEXT,
     status ENUM('todo', 'in_progress', 'done') DEFAULT 'todo',
-    type ENUM('basic', 'bug', 'feature') DEFAULT 'basic',
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    priority ENUM('low', 'medium', 'high') DEFAULT 'medium',
     project_id INT,
     assigned_to INT,
-    FOREIGN KEY (project_id) REFERENCES projects(id),
-    FOREIGN KEY (assigned_to) REFERENCES users(id)
+    created_by INT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE,
+    FOREIGN KEY (assigned_to) REFERENCES users(id) ON DELETE SET NULL,
+    FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE SET NULL
 );
 
-CREATE TABLE tags (
+CREATE TABLE IF NOT EXISTS tags (
     id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(50) NOT NULL UNIQUE
 );
 
-CREATE TABLE task_tags (
+CREATE TABLE IF NOT EXISTS task_tags (
     task_id INT,
     tag_id INT,
     PRIMARY KEY (task_id, tag_id),
@@ -166,23 +235,27 @@ CREATE TABLE task_tags (
     FOREIGN KEY (tag_id) REFERENCES tags(id) ON DELETE CASCADE
 );
 
-CREATE TABLE project_members (
+CREATE TABLE IF NOT EXISTS kanban_boards (
+    id INT AUTO_INCREMENT PRIMARY KEY,
     project_id INT,
-    user_id INT,
-    PRIMARY KEY (project_id, user_id),
-    FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE,
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+    name VARCHAR(255) NOT NULL,
+    FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE
 );
 
-CREATE TABLE activity_log (
+CREATE TABLE IF NOT EXISTS kanban_columns (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    user_id INT,
-    project_id INT,
+    board_id INT,
+    name VARCHAR(255) NOT NULL,
+    position INT NOT NULL,
+    FOREIGN KEY (board_id) REFERENCES kanban_boards(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS kanban_tasks (
+    id INT AUTO_INCREMENT PRIMARY KEY,
     task_id INT,
-    action VARCHAR(255) NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES users(id),
-    FOREIGN KEY (project_id) REFERENCES projects(id),
-    FOREIGN KEY (task_id) REFERENCES tasks(id)
+    column_id INT,
+    position INT NOT NULL,
+    FOREIGN KEY (task_id) REFERENCES tasks(id) ON DELETE CASCADE,
+    FOREIGN KEY (column_id) REFERENCES kanban_columns(id) ON DELETE CASCADE
 );
 

@@ -8,62 +8,49 @@ class Kanban {
         $this->db = $db;
     }
 
-    public function createTask($userId, $title, $description, $status = 'todo', $projectId = null) {
-        $query = "INSERT INTO tasks (title, description, status, project_id, assigned_to) VALUES (?, ?, ?, ?, ?)";
+    public function createBoard($project_id, $name) {
+        $query = "INSERT INTO kanban_boards (project_id, name) VALUES (?, ?)";
         $stmt = $this->db->prepare($query);
-        return $stmt->execute([$title, $description, $status, $projectId, $userId]);
+        return $stmt->execute([$project_id, $name]);
     }
 
-    public function getTasks($userId) {
-        $query = "SELECT * FROM tasks WHERE assigned_to = ? ORDER BY id DESC";
+    public function createColumn($board_id, $name, $position) {
+        $query = "INSERT INTO kanban_columns (board_id, name, position) VALUES (?, ?, ?)";
         $stmt = $this->db->prepare($query);
-        $stmt->execute([$userId]);
+        return $stmt->execute([$board_id, $name, $position]);
+    }
+
+    public function addTaskToColumn($task_id, $column_id, $position) {
+        $query = "INSERT INTO kanban_tasks (task_id, column_id, position) VALUES (?, ?, ?)";
+        $stmt = $this->db->prepare($query);
+        return $stmt->execute([$task_id, $column_id, $position]);
+    }
+
+    public function getBoardByProject($project_id) {
+        $query = "SELECT * FROM kanban_boards WHERE project_id = ?";
+        $stmt = $this->db->prepare($query);
+        $stmt->execute([$project_id]);
+        return $stmt->fetch(\PDO::FETCH_ASSOC);
+    }
+
+    public function getColumnsByBoard($board_id) {
+        $query = "SELECT * FROM kanban_columns WHERE board_id = ? ORDER BY position";
+        $stmt = $this->db->prepare($query);
+        $stmt->execute([$board_id]);
         return $stmt->fetchAll(\PDO::FETCH_ASSOC);
     }
 
-    public function updateTaskStatus($taskId, $newStatus) {
-        $query = "UPDATE tasks SET status = ? WHERE id = ?";
+    public function getTasksByColumn($column_id) {
+        $query = "SELECT t.* FROM tasks t JOIN kanban_tasks kt ON t.id = kt.task_id WHERE kt.column_id = ? ORDER BY kt.position";
         $stmt = $this->db->prepare($query);
-        return $stmt->execute([$newStatus, $taskId]);
+        $stmt->execute([$column_id]);
+        return $stmt->fetchAll(\PDO::FETCH_ASSOC);
     }
 
-    public function deleteTask($taskId) {
-        $query = "DELETE FROM tasks WHERE id = ?";
+    public function moveTask($task_id, $new_column_id, $new_position) {
+        $query = "UPDATE kanban_tasks SET column_id = ?, position = ? WHERE task_id = ?";
         $stmt = $this->db->prepare($query);
-        return $stmt->execute([$taskId]);
-    }
-
-    public function getTasksByStatus($userId) {
-        $query = "SELECT * FROM tasks WHERE assigned_to = ? ORDER BY id DESC";
-        $stmt = $this->db->prepare($query);
-        $stmt->execute([$userId]);
-        $tasks = $stmt->fetchAll(\PDO::FETCH_ASSOC);
-
-        $groupedTasks = [
-            'backlog' => [],
-            'todo' => [],
-            'in_progress' => [],
-            'done' => []
-        ];
-
-        foreach ($tasks as $task) {
-            switch ($task['status']) {
-                case 'todo':
-                    $groupedTasks['todo'][] = $task;
-                    break;
-                case 'in_progress':
-                    $groupedTasks['in_progress'][] = $task;
-                    break;
-                case 'completed':
-                    $groupedTasks['done'][] = $task;
-                    break;
-                default:
-                    $groupedTasks['backlog'][] = $task;
-                    break;
-            }
-        }
-
-        return $groupedTasks;
+        return $stmt->execute([$new_column_id, $new_position, $task_id]);
     }
 }
 

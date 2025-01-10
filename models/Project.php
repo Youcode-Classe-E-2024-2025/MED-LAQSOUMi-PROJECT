@@ -3,13 +3,6 @@ namespace Models;
 
 class Project {
     private $db;
-    private $id;
-    private $name;
-    private $description;
-    private $user_id;
-    private $is_public;
-    private $created_at;
-    private $updated_at;
 
     public function __construct($db) {
         $this->db = $db;
@@ -21,18 +14,18 @@ class Project {
         return $stmt->execute([$name, $description, $user_id, $is_public]);
     }
 
-    public function getByUserId($user_id) {
-        $query = "SELECT * FROM projects WHERE user_id = ?";
-        $stmt = $this->db->prepare($query);
-        $stmt->execute([$user_id]);
-        return $stmt->fetchAll(\PDO::FETCH_ASSOC);
-    }
-
     public function getById($id) {
         $query = "SELECT * FROM projects WHERE id = ?";
         $stmt = $this->db->prepare($query);
         $stmt->execute([$id]);
         return $stmt->fetch(\PDO::FETCH_ASSOC);
+    }
+
+    public function getAll() {
+        $query = "SELECT * FROM projects";
+        $stmt = $this->db->prepare($query);
+        $stmt->execute();
+        return $stmt->fetchAll(\PDO::FETCH_ASSOC);
     }
 
     public function update($id, $name, $description, $is_public) {
@@ -54,10 +47,10 @@ class Project {
         return $stmt->fetchAll(\PDO::FETCH_ASSOC);
     }
 
-    public function getAll() {
-        $query = "SELECT * FROM projects";
+    public function getByUserId($user_id) {
+        $query = "SELECT * FROM projects WHERE user_id = ?";
         $stmt = $this->db->prepare($query);
-        $stmt->execute();
+        $stmt->execute([$user_id]);
         return $stmt->fetchAll(\PDO::FETCH_ASSOC);
     }
 
@@ -70,15 +63,27 @@ class Project {
         return $stmt->fetchAll(\PDO::FETCH_ASSOC);
     }
 
-    // Getters and setters
-    public function getId() { return $this->id; }
-    public function getName() { return $this->name; }
-    public function setName($name) { $this->name = $name; }
-    public function getDescription() { return $this->description; }
-    public function setDescription($description) { $this->description = $description; }
-    public function getUserId() { return $this->user_id; }
-    public function setUserId($user_id) { $this->user_id = $user_id; }
-    public function getIsPublic() { return $this->is_public; }
-    public function setIsPublic($is_public) { $this->is_public = $is_public; }
+    public function getTotalProjects() {
+        $query = "SELECT COUNT(*) as total FROM projects";
+        $stmt = $this->db->prepare($query);
+        $stmt->execute();
+        return $stmt->fetch(\PDO::FETCH_ASSOC)['total'];
+    }
+
+    public function getProjectProgress($id) {
+        $query = "SELECT 
+                    COUNT(*) as total_tasks,
+                    SUM(CASE WHEN status = 'done' THEN 1 ELSE 0 END) as completed_tasks
+                  FROM tasks
+                  WHERE project_id = ?";
+        $stmt = $this->db->prepare($query);
+        $stmt->execute([$id]);
+        $result = $stmt->fetch(\PDO::FETCH_ASSOC);
+        
+        if ($result['total_tasks'] > 0) {
+            return ($result['completed_tasks'] / $result['total_tasks']) * 100;
+        }
+        return 0;
+    }
 }
 

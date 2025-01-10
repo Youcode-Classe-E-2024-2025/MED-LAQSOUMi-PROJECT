@@ -2,21 +2,33 @@
 require_once 'models/Task.php';
 require_once 'models/Project.php';
 require_once 'models/User.php';
+require_once 'models/Category.php';
+require_once 'models/Tag.php';
+require_once 'models/Kanban.php';
 require_once 'includes/utils.php';
 
 use Models\Task;
 use Models\Project;
 use Models\User;
+use Models\Category;
+use Models\Tag;
+use Models\Kanban;
 
 class TaskController {
     private $task;
     private $project;
     private $user;
+    private $category;
+    private $tag;
+    private $kanban;
 
     public function __construct($db) {
         $this->task = new Task($db);
         $this->project = new Project($db);
         $this->user = new User($db);
+        $this->category = new Category($db);
+        $this->tag = new Tag($db);
+        $this->kanban = new Kanban($db);
     }
 
     public function create() {
@@ -24,30 +36,38 @@ class TaskController {
             $title = $_POST['title'];
             $description = $_POST['description'];
             $project_id = $_POST['project_id'];
-            $type = $_POST['type'];
-            $assigned_to = $_POST['assigned_to'] ?? null;
+            $assigned_to = $_POST['assigned_to'];
+            $status = $_POST['status'];
+            $priority = $_POST['priority'];
+            $created_by = $_SESSION['user_id'];
 
-            $project = $this->project->getById($project_id);
-            if (!$project || $project['user_id'] != $_SESSION['user_id']) {
-                setFlashMessage('error', "You don't have permission to add tasks to this project.");
-                header('Location: index.php?action=project_list');
-                exit;
-            }
-
-            if (empty($title)) {
-                $error = "Task title is required.";
-            } else {
-                if ($this->task->create($title, $description, $project_id, $assigned_to, $type)) {
-                    setFlashMessage('success', "Task created successfully.");
-                    header('Location: index.php?action=project_view&id=' . $project_id);
-                    exit;
-                } else {
-                    $error = "Failed to create task. Please try again.";
+            if ($this->task->create($title, $description, $project_id, $assigned_to, $created_by, $status, $priority)) {
+                $task_id = $this->task->getLastInsertId();
+                
+                // Handle tags
+                if (isset($_POST['tags'])) {
+                    foreach ($_POST['tags'] as $tag_id) {
+                        $this->tag->addToTask($task_id, $tag_id);
+                    }
                 }
+
+                // Add task to Kanban board
+                $board = $this->kanban->getBoardByProject($project_id);
+                $columns = $this->kanban->getColumnsByBoard($board['id']);
+                $first_column = $columns[0];
+                $this->kanban->addTaskToColumn($task_id, $first_column['id'], 0);
+
+                setFlashMessage('success', "Task created successfully.");
+                header('Location: index.php?action=project_view&id=' . $project_id);
+                exit;
+            } else {
+                setFlashMessage('error', "Failed to create task. Please try again.");
             }
         }
         $project_id = $_GET['project_id'];
         $team_members = $this->user->getAll();
+        $categories = $this->category->getAll();
+        $tags = $this->tag->getAll();
         require 'views/task/create.php';
     }
 
@@ -70,23 +90,30 @@ class TaskController {
             $title = $_POST['title'];
             $description = $_POST['description'];
             $status = $_POST['status'];
-            $type = $_POST['type'];
+            $priority = $_POST['priority'];
             $assigned_to = $_POST['assigned_to'];
 
-            if (empty($title)) {
-                $error = "Task title is required.";
-            } else {
-                if ($this->task->update($id, $title, $description, $status, $assigned_to, $type)) {
-                    setFlashMessage('success', "Task updated successfully.");
-                    header('Location: index.php?action=project_view&id=' . $task['project_id']);
-                    exit;
-                } else {
-                    $error = "Failed to update task. Please try again.";
+            if ($this->task->update($id, $title, $description, $status, $priority, $assigned_to)) {
+                // Handle tags
+                $this->tag->removeAllFromTask($id);
+                if (isset($_POST['tags'])) {
+                    foreach ($_POST['tags'] as $tag_id) {
+                        $this->tag->addToTask($id, $tag_id);
+                    }
                 }
+
+                setFlashMessage('success', "Task updated successfully.");
+                header('Location: index.php?action=project_view&id=' . $task['project_id']);
+                exit;
+            } else {
+                setFlashMessage('error', "Failed to update task. Please try again.");
             }
         }
 
         $team_members = $this->user->getAll();
+        $categories = $this->category->getAll();
+        $tags = $this->tag->getAll();
+        $task_tags = $this->tag->getTagsByTask($id);
         require 'views/task/edit.php';
     }
 
@@ -111,7 +138,9 @@ class TaskController {
                 header('Location: index.php?action=project_view&id=' . $task['project_id']);
                 exit;
             } else {
-                $error = "Failed to delete task. Please try again.";
+                setFlashMessage('error', "Failed to delete task. Please try again.");
+                header('Location: index.php?action=task_view&id=' . $id);
+                exit;
             }
         }
 
@@ -153,22 +182,49 @@ class TaskController {
 
     public function updateStatus() {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $task_id = $_POST['task_id'];
-            $new_status = $_POST['new_status'];
-            $task = $this->task->getById($task_id);
-
-            if (!$task) {
-                echo json_encode(['success' => false, 'message' => 'Task not found.']);
+            $taskId = $_POST['task_id'];
+            $newStatus = $_POST['new_status'];
+            
+            // Validate input
+            if (!is_numeric($taskId) || !in_array($newStatus, ['backlog', 'todo', 'in_progress', 'done'])) {
+                echo json_encode(['success' => false, 'message' => 'Invalid input']);
                 exit;
             }
-
-            if ($this->task->update($task_id, $task['title'], $task['description'], $new_status, $task['assigned_to'], $task['type'])) {
+            
+            $task = $this->task->getById($taskId);
+            if (!$task) {
+                echo json_encode(['success' => false, 'message' => 'Task not found']);
+                exit;
+            }
+            
+            // Check if the user has permission to update this task
+            if ($_SESSION['user_role'] !== 'admin' && $task['assigned_to'] != $_SESSION['user_id']) {
+                echo json_encode(['success' => false, 'message' => 'You do not have permission to update this task']);
+                exit;
+            }
+            
+            if ($this->task->updateStatus($taskId, $newStatus)) {
                 echo json_encode(['success' => true]);
             } else {
-                echo json_encode(['success' => false, 'message' => 'Failed to update task status.']);
+                echo json_encode(['success' => false, 'message' => 'Failed to update task status']);
             }
         }
         exit;
+    }
+
+    public function moveTask() {
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $task_id = $_POST['task_id'];
+            $new_column_id = $_POST['new_column_id'];
+            $new_position = $_POST['new_position'];
+
+            if ($this->kanban->moveTask($task_id, $new_column_id, $new_position)) {
+                echo json_encode(['success' => true]);
+            } else {
+                echo json_encode(['success' => false, 'message' => 'Failed to move task']);
+            }
+            exit;
+        }
     }
 }
 

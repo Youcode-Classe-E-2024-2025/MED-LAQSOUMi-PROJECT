@@ -6,51 +6,63 @@
     <title><?php echo $pageTitle ?? 'TaskFlow'; ?></title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <style>
-        .flash-message {
+        .kanban-board {
+            display: flex;
+            overflow-x: auto;
+            padding: 20px 0;
+        }
+        .kanban-column {
+            flex: 0 0 300px;
+            margin: 0 10px;
+            background-color: #f1f1f1;
+            border-radius: 5px;
+            padding: 10px;
+        }
+        .kanban-task {
+            background-color: white;
+            border: 1px solid #ddd;
+            border-radius: 3px;
             padding: 10px;
             margin-bottom: 10px;
-            border-radius: 5px;
+            cursor: move;
         }
-        .flash-message.success {
-            background-color: #d4edda;
-            color: #155724;
+        .task-tags {
+            margin-top: 5px;
         }
-        .flash-message.error {
-            background-color: #f8d7da;
-            color: #721c24;
-        }
-        @media (max-width: 768px) {
-            .container {
-                padding-left: 5px;
-                padding-right: 5px;
-            }
-            .table-responsive {
-                font-size: 0.9em;
-            }
+        .tag {
+            display: inline-block;
+            background-color: #007bff;
+            color: white;
+            padding: 2px 5px;
+            border-radius: 3px;
+            font-size: 0.8em;
+            margin-right: 5px;
         }
     </style>
 </head>
 <body>
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
-        <a class="navbar-brand" href="index.php">TaskFlow</a>
+        <a class="navbar-brand" href="index.php?action=dashboard">TaskFlow</a>
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav">
-                <?php if (isset($_SESSION['user_id'])): ?>
+                <?php if (isLoggedIn()): ?>
                     <li class="nav-item">
                         <a class="nav-link" href="index.php?action=dashboard">Dashboard</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="index.php?action=project_list">Projects</a>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="index.php?action=task_list">Tasks</a>
-                    </li>
-                    <?php if (isset($_SESSION['user_role']) && $_SESSION['user_role'] === 'admin'): ?>
+                    <?php if ($_SESSION['user_role'] === 'admin' || $_SESSION['user_role'] === 'project_manager'): ?>
                         <li class="nav-item">
-                            <a class="nav-link" href="index.php?action=admin_dashboard">Admin</a>
+                            <a class="nav-link" href="index.php?action=tag_list">Tags</a>
+                        </li>
+                    <?php endif; ?>
+                    <?php if ($_SESSION['user_role'] === 'admin'): ?>
+                        <li class="nav-item">
+                            <a class="nav-link" href="index.php?action=user_list">Users</a>
                         </li>
                     <?php endif; ?>
                     <li class="nav-item">
@@ -67,11 +79,12 @@
             </ul>
         </div>
     </nav>
+
     <div class="container mt-4">
         <?php
         $flashMessage = getFlashMessage();
         if ($flashMessage) {
-            echo "<div class='flash-message {$flashMessage['type']}'>{$flashMessage['message']}</div>";
+            echo "<div class='alert alert-{$flashMessage['type']}'>{$flashMessage['message']}</div>";
         }
         ?>
 

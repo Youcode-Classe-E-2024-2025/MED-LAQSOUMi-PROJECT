@@ -3,13 +3,6 @@ namespace Models;
 
 class User {
     private $db;
-    private $id;
-    private $name;
-    private $email;
-    private $password;
-    private $role;
-    private $created_at;
-    private $updated_at;
 
     public function __construct($db) {
         $this->db = $db;
@@ -82,13 +75,24 @@ class User {
         return false;
     }
 
-    // Getters and setters
-    public function getId() { return $this->id; }
-    public function getName() { return $this->name; }
-    public function setName($name) { $this->name = $name; }
-    public function getEmail() { return $this->email; }
-    public function setEmail($email) { $this->email = $email; }
-    public function getRole() { return $this->role; }
-    public function setRole($role) { $this->role = $role; }
+    public function getUsersByRole($role) {
+        $query = "SELECT * FROM users WHERE role = ?";
+        $stmt = $this->db->prepare($query);
+        $stmt->execute([$role]);
+        return $stmt->fetchAll(\PDO::FETCH_ASSOC);
+    }
+
+    public function getTotalUsers() {
+        $query = "SELECT COUNT(*) as total FROM users";
+        $stmt = $this->db->prepare($query);
+        $stmt->execute();
+        return $stmt->fetch(\PDO::FETCH_ASSOC)['total'];
+    }
+
+    public function assignRole($userId, $roleId) {
+        $query = "UPDATE users SET role = ? WHERE id = ?";
+        $stmt = $this->db->prepare($query);
+        return $stmt->execute([$roleId, $userId]);
+    }
 }
 

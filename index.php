@@ -1,14 +1,16 @@
 <?php
 session_start();
-require_once 'includes/utils.php';
 require_once 'config/database.php';
 require_once 'controllers/UserController.php';
 require_once 'controllers/ProjectController.php';
 require_once 'controllers/TaskController.php';
+require_once 'controllers/TagController.php';
+require_once 'includes/utils.php';
 
 $userController = new UserController($db);
 $projectController = new ProjectController($db);
 $taskController = new TaskController($db);
+$tagController = new TagController($db);
 
 $action = $_GET['action'] ?? 'login';
 
@@ -24,52 +26,27 @@ switch ($action) {
     case 'dashboard':
         $userController->$action();
         break;
-    case 'user_profile':
-        $userController->profile();
-        break;
-    case 'user_update_email':
-        $userController->updateEmail();
-        break;
-    case 'user_update_password':
-        $userController->updatePassword();
-        break;
     case 'project_create':
-        $projectController->create();
-        break;
-    case 'project_list':
-        $projectController->list();
-        break;
     case 'project_view':
-        $projectController->view($_GET['id'] ?? null);
-        break;
     case 'project_edit':
-        $projectController->edit($_GET['id'] ?? null);
-        break;
     case 'project_delete':
-        $projectController->delete($_GET['id'] ?? null);
+    case 'project_list':
+        $projectController->project_list();
         break;
     case 'task_create':
-        $taskController->create();
-        break;
     case 'task_edit':
-        $taskController->edit($_GET['id'] ?? null);
-        break;
     case 'task_delete':
-        $taskController->delete($_GET['id'] ?? null);
+        $taskController->$action($_GET['id'] ?? null);
         break;
-    case 'task_update_status':
-        $taskController->updateStatus();
+    case 'move_task':
+        $taskController->moveTask();
         break;
-    case 'assigned_tasks':
-        $taskController->assignedTasks();
-        break;
-    case 'kanban':
-        $taskController->kanban();
-        break;
-    case 'get_recent_activity':
-        $userController->getRecentActivity();
+    case 'tag_create':
+    case 'tag_list':
+        $tagController->tag_list();
         break;
     default:
+        setFlashMessage('error', "Invalid action.");
         header('Location: index.php?action=dashboard');
         exit;
 }
