@@ -36,14 +36,30 @@ class TaskController {
 
     public function task_create() {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $title = $_POST['title'];
-            $description = $_POST['description'];
-            $project_id = $_POST['project_id'];
-            $assigned_to = $_POST['assigned_to'];
+            $title = trim($_POST['title']);
+            $description = trim($_POST['description']);
+            $project_id = filter_var($_POST['project_id'], FILTER_VALIDATE_INT);
+            $assigned_to = filter_var($_POST['assigned_to'], FILTER_VALIDATE_INT);
             $status = $_POST['status'];
             $priority = $_POST['priority'];
-            $category_id = !empty($_POST['category_id']) ? $_POST['category_id'] : null;
+            $category_id = !empty($_POST['category_id']) ? filter_var($_POST['category_id'], FILTER_VALIDATE_INT) : null;
             $created_by = $_SESSION['user_id'];
+
+            // Validate input
+            if (empty($title) || empty($description) || !$project_id) {
+                setFlashMessage('error', "Please fill in all required fields.");
+                header('Location: index.php?action=task_create&project_id=' . $project_id);
+                exit;
+            }
+
+            // Validate status and priority
+            $valid_statuses = ['todo', 'in_progress', 'done'];
+            $valid_priorities = ['low', 'medium', 'high'];
+            if (!in_array($status, $valid_statuses) || !in_array($priority, $valid_priorities)) {
+                setFlashMessage('error', "Invalid status or priority.");
+                header('Location: index.php?action=task_create&project_id=' . $project_id);
+                exit;
+            }
 
             if ($this->task->create($title, $description, $project_id, $assigned_to, $created_by, $status, $priority, $category_id)) {
                 $task_id = $this->task->getLastInsertId();

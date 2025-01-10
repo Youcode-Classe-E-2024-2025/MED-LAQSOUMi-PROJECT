@@ -102,7 +102,15 @@ class ProjectController {
     }
 
     public function project_list() {
-        $projects = $this->project->getAll();
+        $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+        $perPage = 10;
+        $offset = ($page - 1) * $perPage;
+
+        $totalProjects = $this->project->getTotalProjects();
+        $totalPages = ceil($totalProjects / $perPage);
+
+        $projects = $this->project->getProjects($offset, $perPage);
+        
         require 'views/project/list.php';
     }
 

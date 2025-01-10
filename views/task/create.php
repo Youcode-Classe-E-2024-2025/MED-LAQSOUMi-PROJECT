@@ -1,8 +1,10 @@
 <?php require_once 'views/templates/header.php'; ?>
 
+
 <h1>Create New Task</h1>
 
 <form action="index.php?action=task_create" method="POST">
+    <input type="hidden" name="csrf_token" value="<?php echo generateCSRFToken(); ?>">
     <input type="hidden" name="project_id" value="<?php echo $project_id; ?>">
     
     <div class="form-group">

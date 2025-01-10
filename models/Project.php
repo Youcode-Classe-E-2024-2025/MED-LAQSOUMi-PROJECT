@@ -9,9 +9,21 @@ class Project {
     }
 
     public function create($name, $description, $user_id, $is_public = false) {
-        $query = "INSERT INTO projects (name, description, user_id, is_public) VALUES (?, ?, ?, ?)";
-        $stmt = $this->db->prepare($query);
-        return $stmt->execute([$name, $description, $user_id, $is_public]);
+        try {
+            $query = "INSERT INTO projects (name, description, user_id, is_public) VALUES (?, ?, ?, ?)";
+            $stmt = $this->db->prepare($query);
+            $result = $stmt->execute([$name, $description, $user_id, $is_public]);
+            if (!$result) {
+                throw new \Exception("Failed to create project");
+            }
+            return $this->db->lastInsertId();
+        } catch (\PDOException $e) {
+            error_log("Database error: " . $e->getMessage());
+            return false;
+        } catch (\Exception $e) {
+            error_log("Error creating project: " . $e->getMessage());
+            return false;
+        }
     }
 
     public function getById($id) {
@@ -72,8 +84,8 @@ class Project {
 
     public function getProjectProgress($id) {
         $query = "SELECT 
-                  COUNT(*) as total_tasks,
-                  SUM(CASE WHEN status = 'done' THEN 1 ELSE 0 END) as completed_tasks
+                    COUNT(*) as total_tasks,
+                    SUM(CASE WHEN status = 'done' THEN 1 ELSE 0 END) as completed_tasks
                   FROM tasks
                   WHERE project_id = ?";
         $stmt = $this->db->prepare($query);
@@ -88,6 +100,15 @@ class Project {
 
     public function getLastInsertId() {
         return $this->db->lastInsertId();
+    }
+
+    public function getProjects($offset, $limit) {
+        $query = "SELECT * FROM projects LIMIT ?, ?";
+        $stmt = $this->db->prepare($query);
+        $stmt->bindValue(1, $offset, \PDO::PARAM_INT);
+        $stmt->bindValue(2, $limit, \PDO::PARAM_INT);
+        $stmt->execute();
+        return $stmt->fetchAll(\PDO::FETCH_ASSOC);
     }
 }
 

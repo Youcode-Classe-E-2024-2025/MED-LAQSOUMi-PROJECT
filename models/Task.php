@@ -122,5 +122,16 @@ class Task {
         $stmt->execute([$user_id]);
         return $stmt->fetchAll(\PDO::FETCH_ASSOC);
     }
+
+    public function getTasksWithDetails($project_id) {
+        $query = "SELECT t.*, u.name as assigned_to_name, c.name as category_name 
+                  FROM tasks t 
+                  LEFT JOIN users u ON t.assigned_to = u.id 
+                  LEFT JOIN categories c ON t.category_id = c.id 
+                  WHERE t.project_id = ?";
+        $stmt = $this->db->prepare($query);
+        $stmt->execute([$project_id]);
+        return $stmt->fetchAll(\PDO::FETCH_ASSOC);
+    }
 }
 
