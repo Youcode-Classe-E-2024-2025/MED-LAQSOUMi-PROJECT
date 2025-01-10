@@ -97,5 +97,37 @@ class ProjectController {
         $projects = $this->project->getAll();
         require 'views/project/list.php';
     }
+
+    public function userProjects() {
+        $user_id = $_SESSION['user_id'];
+        $user_role = $_SESSION['user_role'];
+    
+        if ($user_role === 'admin') {
+            $projects = $this->project->getAll();
+        } elseif ($user_role === 'project_manager') {
+            $projects = $this->project->getByUserId($user_id);
+        } else {
+            $projects = $this->project->getAssignedAndPublicProjects($user_id);
+        }
+    
+        require 'views/project/user_projects.php';
+    }
+
+    public function kanbanBoard($id) {
+        $project = $this->project->getById($id);
+        if (!$project) {
+            setFlashMessage('error', "Project not found.");
+            header('Location: index.php?action=project_list');
+            exit;
+        }
+    
+        $board = $this->kanban->getBoardByProject($id);
+        $columns = $this->kanban->getColumnsByBoard($board['id']);
+        foreach ($columns as &$column) {
+            $column['tasks'] = $this->kanban->getTasksByColumn($column['id']);
+        }
+    
+        require 'views/project/kanban_board.php';
+    }
 }
 

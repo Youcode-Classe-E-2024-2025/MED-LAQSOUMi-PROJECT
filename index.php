@@ -7,6 +7,8 @@ require_once 'controllers/TaskController.php';
 require_once 'controllers/TagController.php';
 require_once 'includes/utils.php';
 
+$db = getDatabaseConnection();
+
 $userController = new UserController($db);
 $projectController = new ProjectController($db);
 $taskController = new TaskController($db);
@@ -31,7 +33,7 @@ switch ($action) {
     case 'project_edit':
     case 'project_delete':
     case 'project_list':
-        $projectController->project_list();
+        $projectController->$action();
         break;
     case 'task_create':
     case 'task_edit':
@@ -43,7 +45,16 @@ switch ($action) {
         break;
     case 'tag_create':
     case 'tag_list':
-        $tagController->tag_list();
+        $tagController->$action();
+        break;
+    case 'user_projects':
+        $projectController->userProjects();
+        break;
+    case 'project_kanban':
+        $projectController->kanbanBoard($_GET['id']);
+        break;
+    case 'user_tasks':
+        $taskController->userTasks();
         break;
     default:
         setFlashMessage('error', "Invalid action.");

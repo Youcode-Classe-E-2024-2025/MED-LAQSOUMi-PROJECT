@@ -1,8 +1,8 @@
 <?php
-require_once 'models/User.php';
-require_once 'models/Task.php';
-require_once 'models/Project.php';
-require_once 'includes/utils.php';
+require_once __DIR__ . '/../models/User.php';
+require_once __DIR__ . '/../models/Task.php';
+require_once __DIR__ . '/../models/Project.php';
+require_once __DIR__ . '/../includes/utils.php';
 
 use Models\User;
 use Models\Task;
@@ -12,8 +12,10 @@ class UserController {
     private $user;
     private $task;
     private $project;
+    private $db;
 
     public function __construct($db) {
+        $this->db = $db;
         $this->user = new User($db);
         $this->task = new Task($db);
         $this->project = new Project($db);

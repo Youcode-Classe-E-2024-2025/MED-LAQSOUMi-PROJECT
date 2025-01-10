@@ -42,43 +42,46 @@
 </head>
 <body>
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
-        <a class="navbar-brand" href="index.php?action=dashboard">TaskFlow</a>
-        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navbarNav">
-            <ul class="navbar-nav">
-                <?php if (isLoggedIn()): ?>
+    <a class="navbar-brand" href="index.php?action=dashboard">TaskFlow</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav">
+            <?php if (isLoggedIn()): ?>
+                <li class="nav-item">
+                    <a class="nav-link" href="index.php?action=dashboard">Dashboard</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="index.php?action=user_projects">My Projects</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="index.php?action=user_tasks">My Tasks</a>
+                </li>
+                <?php if ($_SESSION['user_role'] === 'admin' || $_SESSION['user_role'] === 'project_manager'): ?>
                     <li class="nav-item">
-                        <a class="nav-link" href="index.php?action=dashboard">Dashboard</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="index.php?action=project_list">Projects</a>
-                    </li>
-                    <?php if ($_SESSION['user_role'] === 'admin' || $_SESSION['user_role'] === 'project_manager'): ?>
-                        <li class="nav-item">
-                            <a class="nav-link" href="index.php?action=tag_list">Tags</a>
-                        </li>
-                    <?php endif; ?>
-                    <?php if ($_SESSION['user_role'] === 'admin'): ?>
-                        <li class="nav-item">
-                            <a class="nav-link" href="index.php?action=user_list">Users</a>
-                        </li>
-                    <?php endif; ?>
-                    <li class="nav-item">
-                        <a class="nav-link" href="index.php?action=logout">Logout</a>
-                    </li>
-                <?php else: ?>
-                    <li class="nav-item">
-                        <a class="nav-link" href="index.php?action=login">Login</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="index.php?action=register">Register</a>
+                        <a class="nav-link" href="index.php?action=project_create">Create Project</a>
                     </li>
                 <?php endif; ?>
-            </ul>
-        </div>
-    </nav>
+                <?php if ($_SESSION['user_role'] === 'admin'): ?>
+                    <li class="nav-item">
+                        <a class="nav-link" href="index.php?action=manage_users">Manage Users</a>
+                    </li>
+                <?php endif; ?>
+                <li class="nav-item">
+                    <a class="nav-link" href="index.php?action=logout">Logout</a>
+                </li>
+            <?php else: ?>
+                <li class="nav-item">
+                    <a class="nav-link" href="index.php?action=login">Login</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="index.php?action=register">Register</a>
+                </li>
+            <?php endif; ?>
+        </ul>
+    </div>
+</nav>
 
     <div class="container mt-4">
         <?php
@@ -87,4 +90,8 @@
             echo "<div class='alert alert-{$flashMessage['type']}'>{$flashMessage['message']}</div>";
         }
         ?>
+
+
+</body>
+</html>
 

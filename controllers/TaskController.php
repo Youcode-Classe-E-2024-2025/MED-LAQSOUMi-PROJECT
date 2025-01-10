@@ -226,5 +226,20 @@ class TaskController {
             exit;
         }
     }
+
+    public function userTasks() {
+        $user_id = $_SESSION['user_id'];
+        $user_role = $_SESSION['user_role'];
+    
+        if ($user_role === 'admin') {
+            $tasks = $this->task->getAllTasks();
+        } elseif ($user_role === 'project_manager') {
+            $tasks = $this->task->getTasksByProjectManager($user_id);
+        } else {
+            $tasks = $this->task->getAssignedTasks($user_id);
+        }
+    
+        require 'views/task/user_tasks.php';
+    }
 }
 
