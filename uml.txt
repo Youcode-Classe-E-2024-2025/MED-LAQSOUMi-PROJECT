@@ -1,0 +1,107 @@
+---
+config:
+  theme: default
+---
+classDiagram
+    class User {
+        -id : int
+        -name : string
+        -email : string
+        -password : string
+        -role : string
+        -create()  bool
+        -login()  bool
+        -getById()  User
+        -hashPassword()  string
+        -verifyPassword()  bool
+    }
+    class Project {
+        -id : int
+        -name : string
+        -description : string
+        -userId : int
+        -isPublic : bool
+        -create()  int
+        -getById()  Project
+        -update()  bool
+        -validateProjectData()  bool
+    }
+    class Task {
+        -id : int
+        -title : string
+        -description : string
+        -status : string
+        -priority : string
+        -projectId : int
+        -assignedTo : int
+        -createdBy : int
+        -create()  bool
+        -getByProjectId()  Task[]
+        -calculatePriority()  string
+    }
+    class Category {
+        -id : int
+        -name : string
+        -create()  bool
+        -getAll()  Category[]
+        -validateName()  bool
+    }
+    class Tag {
+        -id : int
+        -name : string
+        -create()  bool
+        -addToTask()  bool
+        -validateTagName()  bool
+    }
+    class Kanban {
+        -id : int
+        -projectId : int
+        -createBoard()  int
+        -getColumnsByBoard()  array
+        -updateColumnPositions()  bool
+    }
+    class UserController {
+        -user : User
+        -register()  void
+        -login()  void
+        -validateUserInput()  bool
+    }
+    class ProjectController {
+        -project : Project
+        -create()  void
+        -view()  void
+        -authorizeUser()  bool
+    }
+    class TaskController {
+        -task : Task
+        -create()  void
+        -assignTask()  void
+        -notifyAssignee()  void
+    }
+    class CategoryController {
+        -category : Category
+        -list()  void
+        -filterCategories()  array
+    }
+    class TagController {
+        -tag : Tag
+        -create()  void
+        -sanitizeTagInput()  string
+    }
+    class KanbanController {
+        -kanban : Kanban
+        -moveTask()  void
+        -validateBoardAccess()  bool
+    }
+    User "1" -- "*" Project : manages
+    User "1" -- "*" Task : assigned to
+    Project "1" -- "*" Task : contains
+    Task "*" -- "*" Tag : has
+    Task "1" -- "0..1" Category : belongs to
+    Project "1" -- "1" Kanban : has
+    UserController -- User : manages
+    ProjectController -- Project : manages
+    TaskController -- Task : manages
+    TagController -- Tag : manages
+    KanbanController -- Kanban : manages
+    CategoryController -- Category : manages

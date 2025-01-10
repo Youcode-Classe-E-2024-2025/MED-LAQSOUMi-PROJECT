@@ -1,194 +1,7 @@
--- -- Create tables
--- CREATE TABLE users (
---     id INT AUTO_INCREMENT PRIMARY KEY,
---     name VARCHAR(255) NOT NULL,
---     email VARCHAR(255) NOT NULL UNIQUE,
---     password VARCHAR(255) NOT NULL,
---     role ENUM('admin', 'manager', 'developer', 'user') DEFAULT 'user'
--- );
-
--- CREATE TABLE projects (
---     id INT AUTO_INCREMENT PRIMARY KEY,
---     name VARCHAR(255) NOT NULL,
---     description TEXT,
---     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
---     user_id INT,
---     FOREIGN KEY (user_id) REFERENCES users(id)
--- );
-
--- CREATE TABLE tasks (
---     id INT AUTO_INCREMENT PRIMARY KEY,
---     title VARCHAR(255) NOT NULL,
---     description TEXT,
---     status ENUM('todo', 'in_progress', 'completed') DEFAULT 'todo',
---     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
---     project_id INT,
---     assigned_to INT,
---     FOREIGN KEY (project_id) REFERENCES projects(id),
---     FOREIGN KEY (assigned_to) REFERENCES users(id)
--- );
-
--- CREATE TABLE roles (
---     id INT AUTO_INCREMENT PRIMARY KEY,
---     name VARCHAR(50) NOT NULL UNIQUE
--- );
-
--- CREATE TABLE permissions (
---     id INT AUTO_INCREMENT PRIMARY KEY,
---     name VARCHAR(50) NOT NULL UNIQUE
--- );
-
--- CREATE TABLE role_permissions (
---     role_id INT,
---     permission_id INT,
---     PRIMARY KEY (role_id, permission_id),
---     FOREIGN KEY (role_id) REFERENCES roles(id) ON DELETE CASCADE,
---     FOREIGN KEY (permission_id) REFERENCES permissions(id) ON DELETE CASCADE
--- );
-
--- -- Insert sample users
--- INSERT INTO users (name, email, password, role) VALUES
--- ('Admin User', 'admin@example.com', '$2y$10$jb2COpaZSdFhs4PXUcRSHOX7LvQrROHZ.Qe5zhNuAIXWiFOj4injG', 'admin'),
--- ('Manager User', 'manager@example.com', '$2y$10$jb2COpaZSdFhs4PXUcRSHOX7LvQrROHZ.Qe5zhNuAIXWiFOj4injG', 'manager'),
--- ('Developer 1', 'dev1@example.com', '$2y$10$jb2COpaZSdFhs4PXUcRSHOX7LvQrROHZ.Qe5zhNuAIXWiFOj4injG', 'developer'),
--- ('Developer 2', 'dev2@example.com', '$2y$10$jb2COpaZSdFhs4PXUcRSHOX7LvQrROHZ.Qe5zhNuAIXWiFOj4injG', 'developer'),
--- ('Regular User 1', 'user1@example.com', '$2y$10$jb2COpaZSdFhs4PXUcRSHOX7LvQrROHZ.Qe5zhNuAIXWiFOj4injG', 'user'),
--- ('Regular User 2', 'user2@example.com', '$2y$10$jb2COpaZSdFhs4PXUcRSHOX7LvQrROHZ.Qe5zhNuAIXWiFOj4injG', 'user');
-
--- -- Insert sample projects
--- INSERT INTO projects (name, description, user_id) VALUES
--- ('Website Redesign', 'Redesign the company website for better user experience', 1),
--- ('Mobile App Development', 'Develop a new mobile app for customer engagement', 2),
--- ('Database Optimization', 'Optimize database queries for improved performance', 1),
--- ('User Authentication System', 'Implement a secure user authentication system', 3),
--- ('API Integration', 'Integrate third-party APIs for enhanced functionality', 4);
-
--- -- Insert sample tasks
--- INSERT INTO tasks (title, description, status, project_id, assigned_to) VALUES
--- ('Design Homepage', 'Create a new design for the homepage', 'in_progress', 1, 3),
--- ('Implement User Registration', 'Add user registration functionality to the website', 'todo', 1, 4),
--- ('Develop Login Screen', 'Create the login screen for the mobile app', 'in_progress', 2, 3),
--- ('Optimize SQL Queries', 'Review and optimize slow SQL queries', 'todo', 3, 4),
--- ('Implement OAuth', 'Add OAuth authentication to the system', 'todo', 4, 3),
--- ('Integrate Payment Gateway', 'Integrate a payment gateway API', 'in_progress', 5, 4),
--- ('Write API Documentation', 'Document the new API endpoints', 'todo', 5, 5);
-
--- -- Insert roles
--- INSERT INTO roles (name) VALUES
--- ('Admin'),
--- ('Project Manager'),
--- ('Developer'),
--- ('User');
-
--- -- Insert permissions
--- INSERT INTO permissions (name) VALUES
--- ('manage_users'),
--- ('manage_roles'),
--- ('manage_permissions'),
--- ('create_project'),
--- ('edit_project'),
--- ('delete_project'),
--- ('create_task'),
--- ('edit_task'),
--- ('delete_task'),
--- ('assign_task'),
--- ('view_project'),
--- ('view_task');
-
--- -- Assign permissions to roles
--- INSERT INTO role_permissions (role_id, permission_id)
--- SELECT 1, id FROM permissions;  -- Assign all permissions to Admin
-
--- INSERT INTO role_permissions (role_id, permission_id)
--- SELECT 2, id FROM permissions 
--- WHERE name IN ('create_project', 'edit_project', 'delete_project', 'create_task', 'edit_task', 'delete_task', 'assign_task', 'view_project', 'view_task');
-
--- INSERT INTO role_permissions (role_id, permission_id)
--- SELECT 3, id FROM permissions 
--- WHERE name IN ('create_task', 'edit_task', 'view_project', 'view_task');
-
--- INSERT INTO role_permissions (role_id, permission_id)
--- SELECT 4, id FROM permissions 
--- WHERE name IN ('view_project', 'view_task');
-
-
-
-
-
-
-
-
-
--- -- Create tables
--- CREATE TABLE users (
---     id INT AUTO_INCREMENT PRIMARY KEY,
---     name VARCHAR(255) NOT NULL,
---     email VARCHAR(255) NOT NULL UNIQUE,
---     password VARCHAR(255) NOT NULL,
---     role ENUM('admin', 'project_manager', 'team_member', 'guest') DEFAULT 'team_member'
--- );
-
--- CREATE TABLE projects (
---     id INT AUTO_INCREMENT PRIMARY KEY,
---     name VARCHAR(255) NOT NULL,
---     description TEXT,
---     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
---     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
---     user_id INT,
---     is_public BOOLEAN DEFAULT FALSE,
---     FOREIGN KEY (user_id) REFERENCES users(id)
--- );
-
--- CREATE TABLE tasks (
---     id INT AUTO_INCREMENT PRIMARY KEY,
---     title VARCHAR(255) NOT NULL,
---     description TEXT,
---     status ENUM('todo', 'in_progress', 'done') DEFAULT 'todo',
---     type ENUM('basic', 'bug', 'feature') DEFAULT 'basic',
---     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
---     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
---     project_id INT,
---     assigned_to INT,
---     FOREIGN KEY (project_id) REFERENCES projects(id),
---     FOREIGN KEY (assigned_to) REFERENCES users(id)
--- );
-
--- CREATE TABLE tags (
---     id INT AUTO_INCREMENT PRIMARY KEY,
---     name VARCHAR(50) NOT NULL UNIQUE
--- );
-
--- CREATE TABLE task_tags (
---     task_id INT,
---     tag_id INT,
---     PRIMARY KEY (task_id, tag_id),
---     FOREIGN KEY (task_id) REFERENCES tasks(id) ON DELETE CASCADE,
---     FOREIGN KEY (tag_id) REFERENCES tags(id) ON DELETE CASCADE
--- );
-
--- CREATE TABLE project_members (
---     project_id INT,
---     user_id INT,
---     PRIMARY KEY (project_id, user_id),
---     FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE,
---     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
--- );
-
--- CREATE TABLE activity_log (
---     id INT AUTO_INCREMENT PRIMARY KEY,
---     user_id INT,
---     project_id INT,
---     task_id INT,
---     action VARCHAR(255) NOT NULL,
---     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
---     FOREIGN KEY (user_id) REFERENCES users(id),
---     FOREIGN KEY (project_id) REFERENCES projects(id),
---     FOREIGN KEY (task_id) REFERENCES tasks(id)
--- );
-
-
-
-CREATE TABLE IF NOT EXISTS users (
+create database taskflow;
+use taskflow;
+-- Create users table
+CREATE TABLE users (
     id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
     email VARCHAR(255) NOT NULL UNIQUE,
@@ -197,7 +10,8 @@ CREATE TABLE IF NOT EXISTS users (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE TABLE IF NOT EXISTS projects (
+-- Create projects table
+CREATE TABLE projects (
     id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
     description TEXT,
@@ -207,7 +21,8 @@ CREATE TABLE IF NOT EXISTS projects (
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
 );
 
-CREATE TABLE IF NOT EXISTS tasks (
+-- Create tasks table
+CREATE TABLE tasks (
     id INT AUTO_INCREMENT PRIMARY KEY,
     title VARCHAR(255) NOT NULL,
     description TEXT,
@@ -222,12 +37,14 @@ CREATE TABLE IF NOT EXISTS tasks (
     FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE SET NULL
 );
 
-CREATE TABLE IF NOT EXISTS tags (
+-- Create tags table
+CREATE TABLE tags (
     id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(50) NOT NULL UNIQUE
 );
 
-CREATE TABLE IF NOT EXISTS task_tags (
+-- Create task_tags table
+CREATE TABLE task_tags (
     task_id INT,
     tag_id INT,
     PRIMARY KEY (task_id, tag_id),
@@ -235,14 +52,16 @@ CREATE TABLE IF NOT EXISTS task_tags (
     FOREIGN KEY (tag_id) REFERENCES tags(id) ON DELETE CASCADE
 );
 
-CREATE TABLE IF NOT EXISTS kanban_boards (
+-- Create kanban_boards table
+CREATE TABLE kanban_boards (
     id INT AUTO_INCREMENT PRIMARY KEY,
     project_id INT,
     name VARCHAR(255) NOT NULL,
     FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE
 );
 
-CREATE TABLE IF NOT EXISTS kanban_columns (
+-- Create kanban_columns table
+CREATE TABLE kanban_columns (
     id INT AUTO_INCREMENT PRIMARY KEY,
     board_id INT,
     name VARCHAR(255) NOT NULL,
@@ -250,7 +69,8 @@ CREATE TABLE IF NOT EXISTS kanban_columns (
     FOREIGN KEY (board_id) REFERENCES kanban_boards(id) ON DELETE CASCADE
 );
 
-CREATE TABLE IF NOT EXISTS kanban_tasks (
+-- Create kanban_tasks table
+CREATE TABLE kanban_tasks (
     id INT AUTO_INCREMENT PRIMARY KEY,
     task_id INT,
     column_id INT,
@@ -258,4 +78,74 @@ CREATE TABLE IF NOT EXISTS kanban_tasks (
     FOREIGN KEY (task_id) REFERENCES tasks(id) ON DELETE CASCADE,
     FOREIGN KEY (column_id) REFERENCES kanban_columns(id) ON DELETE CASCADE
 );
+
+-- Insert sample data
+
+-- Users
+INSERT INTO users (name, email, password, role) VALUES
+('Admin User', 'admin@taskflow.com', '$2y$10$jb2COpaZSdFhs4PXUcRSHOX7LvQrROHZ.Qe5zhNuAIXWiFOj4injG', 'admin'),
+('Project Manager', 'pm@taskflow.com', '$2y$10$jb2COpaZSdFhs4PXUcRSHOX7LvQrROHZ.Qe5zhNuAIXWiFOj4injG', 'project_manager'),
+('Team Member 1', 'team1@taskflow.com', '$2y$10$jb2COpaZSdFhs4PXUcRSHOX7LvQrROHZ.Qe5zhNuAIXWiFOj4injG', 'team_member'),
+('Team Member 2', 'team2@taskflow.com', '$2y$10$jb2COpaZSdFhs4PXUcRSHOX7LvQrROHZ.Qe5zhNuAIXWiFOj4injG', 'team_member'),
+('Guest User', 'guest@taskflow.com', '$2y$10$jb2COpaZSdFhs4PXUcRSHOX7LvQrROHZ.Qe5zhNuAIXWiFOj4injG', 'guest');
+
+-- Projects
+INSERT INTO projects (name, description, user_id, is_public) VALUES
+('Website Redesign', 'Redesign company website for better user experience', 2, true),
+('Mobile App Development', 'Develop a new mobile app for task management', 2, false),
+('Marketing Campaign', 'Plan and execute Q4 marketing campaign', 2, true);
+
+-- Tasks
+INSERT INTO tasks (title, description, status, priority, project_id, assigned_to, created_by) VALUES
+('Design Homepage', 'Create a new design for the homepage', 'todo', 'high', 1, 3, 2),
+('Implement User Authentication', 'Add user login and registration functionality', 'in_progress', 'high', 1, 4, 2),
+('Create App Wireframes', 'Design initial wireframes for the mobile app', 'done', 'medium', 2, 3, 2),
+('Develop API', 'Create RESTful API for the mobile app', 'in_progress', 'high', 2, 4, 2),
+('Content Strategy', 'Develop content strategy for the marketing campaign', 'todo', 'medium', 3, 3, 2),
+('Social Media Plan', 'Create a social media plan for the campaign', 'todo', 'low', 3, 4, 2);
+
+-- Tags
+INSERT INTO tags (name) VALUES
+('UI/UX'),
+('Frontend'),
+('Backend'),
+('Mobile'),
+('Marketing');
+
+-- Task Tags
+INSERT INTO task_tags (task_id, tag_id) VALUES
+(1, 1), (1, 2),
+(2, 2), (2, 3),
+(3, 1), (3, 4),
+(4, 3), (4, 4),
+(5, 5),
+(6, 5);
+
+-- Kanban Boards
+INSERT INTO kanban_boards (project_id, name) VALUES
+(1, 'Website Redesign Board'),
+(2, 'Mobile App Development Board'),
+(3, 'Marketing Campaign Board');
+
+-- Kanban Columns
+INSERT INTO kanban_columns (board_id, name, position) VALUES
+(1, 'To Do', 1),
+(1, 'In Progress', 2),
+(1, 'Done', 3),
+(2, 'Backlog', 1),
+(2, 'In Development', 2),
+(2, 'Testing', 3),
+(2, 'Done', 4),
+(3, 'Planning', 1),
+(3, 'Execution', 2),
+(3, 'Review', 3);
+
+-- Kanban Tasks
+INSERT INTO kanban_tasks (task_id, column_id, position) VALUES
+(1, 1, 1),
+(2, 2, 1),
+(3, 7, 1),
+(4, 5, 1),
+(5, 8, 1),
+(6, 8, 2);
 
