@@ -11,7 +11,10 @@ class Kanban {
     public function createBoard($project_id, $name) {
         $query = "INSERT INTO kanban_boards (project_id, name) VALUES (?, ?)";
         $stmt = $this->db->prepare($query);
-        return $stmt->execute([$project_id, $name]);
+        if ($stmt->execute([$project_id, $name])) {
+            return $this->db->lastInsertId();
+        }
+        return false;
     }
 
     public function createColumn($board_id, $name, $position) {
@@ -51,6 +54,10 @@ class Kanban {
         $query = "UPDATE kanban_tasks SET column_id = ?, position = ? WHERE task_id = ?";
         $stmt = $this->db->prepare($query);
         return $stmt->execute([$new_column_id, $new_position, $task_id]);
+    }
+
+    public function getLastInsertId() {
+        return $this->db->lastInsertId();
     }
 }
 

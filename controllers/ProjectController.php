@@ -34,16 +34,18 @@ class ProjectController {
             $is_public = isset($_POST['is_public']) ? 1 : 0;
             $user_id = $_SESSION['user_id'];
 
-            if ($this->project->create($name, $description, $user_id, $is_public)) {
-                $project_id = $this->project->getLastInsertId();
-                $this->kanban->createBoard($project_id, 'Default Board');
-                $board_id = $this->kanban->getLastInsertId();
-                $this->kanban->createColumn($board_id, 'To Do', 1);
-                $this->kanban->createColumn($board_id, 'In Progress', 2);
-                $this->kanban->createColumn($board_id, 'Done', 3);
-                setFlashMessage('success', "Project created successfully.");
-                header('Location: index.php?action=project_view&id=' . $project_id);
-                exit;
+            if ($project_id = $this->project->create($name, $description, $user_id, $is_public)) {
+                $board_id = $this->kanban->createBoard($project_id, 'Default Board');
+                if ($board_id) {
+                    $this->kanban->createColumn($board_id, 'To Do', 1);
+                    $this->kanban->createColumn($board_id, 'In Progress', 2);
+                    $this->kanban->createColumn($board_id, 'Done', 3);
+                    setFlashMessage('success', "Project created successfully.");
+                    header('Location: index.php?action=project_view&id=' . $project_id);
+                    exit;
+                } else {
+                    setFlashMessage('error', "Failed to create Kanban board. Please try again.");
+                }
             } else {
                 setFlashMessage('error', "Failed to create project. Please try again.");
             }
