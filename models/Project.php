@@ -2,7 +2,7 @@
 namespace Models;
 
 class Project {
-    private $db;
+    protected $db;
 
     public function __construct($db) {
         $this->db = $db;
@@ -72,8 +72,8 @@ class Project {
 
     public function getProjectProgress($id) {
         $query = "SELECT 
-                    COUNT(*) as total_tasks,
-                    SUM(CASE WHEN status = 'done' THEN 1 ELSE 0 END) as completed_tasks
+                  COUNT(*) as total_tasks,
+                  SUM(CASE WHEN status = 'done' THEN 1 ELSE 0 END) as completed_tasks
                   FROM tasks
                   WHERE project_id = ?";
         $stmt = $this->db->prepare($query);
@@ -84,6 +84,10 @@ class Project {
             return ($result['completed_tasks'] / $result['total_tasks']) * 100;
         }
         return 0;
+    }
+
+    public function getLastInsertId() {
+        return $this->db->lastInsertId();
     }
 }
 

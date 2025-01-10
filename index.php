@@ -43,6 +43,7 @@ switch ($action) {
     case 'task_create':
     case 'task_edit':
     case 'task_delete':
+    case 'task_view':
         $taskController->$action($_GET['id'] ?? null);
         break;
     case 'move_task':
@@ -60,6 +61,9 @@ switch ($action) {
         break;
     case 'user_tasks':
         $taskController->userTasks();
+        break;
+    case 'manage_users':
+        $userController->manageUsers();
         break;
     default:
         setFlashMessage('error', "Invalid action.");

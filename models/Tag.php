@@ -39,5 +39,11 @@ class Tag {
         $stmt->execute([$task_id]);
         return $stmt->fetchAll(\PDO::FETCH_ASSOC);
     }
+
+    public function removeAllFromTask($task_id) {
+        $query = "DELETE FROM task_tags WHERE task_id = ?";
+        $stmt = $this->db->prepare($query);
+        return $stmt->execute([$task_id]);
+    }
 }
 

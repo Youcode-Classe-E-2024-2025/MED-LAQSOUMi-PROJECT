@@ -8,10 +8,10 @@ class Task {
         $this->db = $db;
     }
 
-    public function create($title, $description, $project_id, $assigned_to, $created_by, $status = 'todo', $priority = 'medium') {
-        $query = "INSERT INTO tasks (title, description, project_id, assigned_to, created_by, status, priority) VALUES (?, ?, ?, ?, ?, ?, ?)";
+    public function create($title, $description, $project_id, $assigned_to, $created_by, $status = 'todo', $priority = 'medium', $category_id = null) {
+        $query = "INSERT INTO tasks (title, description, project_id, assigned_to, created_by, status, priority, category_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
         $stmt = $this->db->prepare($query);
-        return $stmt->execute([$title, $description, $project_id, $assigned_to, $created_by, $status, $priority]);
+        return $stmt->execute([$title, $description, $project_id, $assigned_to, $created_by, $status, $priority, $category_id]);
     }
 
     public function getByProjectId($project_id) {
@@ -22,16 +22,20 @@ class Task {
     }
 
     public function getById($id) {
-        $query = "SELECT t.*, c.name as category_name FROM tasks t LEFT JOIN categories c ON t.category_id = c.id WHERE t.id = ?";
+        $query = "SELECT t.*, c.name as category_name, u.name as assigned_to_name 
+                  FROM tasks t 
+                  LEFT JOIN categories c ON t.category_id = c.id 
+                  LEFT JOIN users u ON t.assigned_to = u.id 
+                  WHERE t.id = ?";
         $stmt = $this->db->prepare($query);
         $stmt->execute([$id]);
         return $stmt->fetch(\PDO::FETCH_ASSOC);
     }
 
-    public function update($id, $title, $description, $status, $priority, $assigned_to, $category_id) {
+    public function update($id, $title, $description, $status, $priority, $assigned_to, $category_id = null) {
         $query = "UPDATE tasks SET title = ?, description = ?, status = ?, priority = ?, assigned_to = ?, category_id = ? WHERE id = ?";
         $stmt = $this->db->prepare($query);
-        return $stmt->execute([$title, $description, $status, $priority, $assigned_to, $category_id, $id]);
+        return $stmt->execute([$title, $description, $status, $priority, $assigned_to ?: null, $category_id ?: null, $id]);
     }
 
     public function delete($id) {
@@ -100,6 +104,20 @@ class Task {
     }
     public function getTasksByUser($user_id) {
         $query = "SELECT * FROM tasks WHERE assigned_to = ?";
+        $stmt = $this->db->prepare($query);
+        $stmt->execute([$user_id]);
+        return $stmt->fetchAll(\PDO::FETCH_ASSOC);
+    }
+
+    public function getLastInsertId() {
+        return $this->db->lastInsertId();
+    }
+
+    public function getTasksByProjectManager($user_id) {
+        $query = "SELECT t.*, p.name as project_name 
+                  FROM tasks t 
+                  JOIN projects p ON t.project_id = p.id 
+                  WHERE p.user_id = ?";
         $stmt = $this->db->prepare($query);
         $stmt->execute([$user_id]);
         return $stmt->fetchAll(\PDO::FETCH_ASSOC);

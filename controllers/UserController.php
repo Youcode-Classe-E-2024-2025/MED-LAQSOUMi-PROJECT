@@ -202,5 +202,31 @@ class UserController {
             ['type' => 'New User', 'description' => 'User "John Doe" registered', 'date' => '2023-05-08 16:45:00'],
         ];
     }
+
+    public function manageUsers() {
+        // Check if the current user is an admin
+        if ($_SESSION['user_role'] !== 'admin') {
+            setFlashMessage('error', "You don't have permission to access this page.");
+            header('Location: index.php?action=dashboard');
+            exit;
+        }
+
+        $users = $this->user->getAll();
+
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $userId = $_POST['user_id'];
+            $newRole = $_POST['new_role'];
+
+            if ($this->user->updateRole($userId, $newRole)) {
+                setFlashMessage('success', "User role updated successfully.");
+            } else {
+                setFlashMessage('error', "Failed to update user role.");
+            }
+            header('Location: index.php?action=manage_users');
+            exit;
+        }
+
+        require 'views/admin/manage_users.php';
+    }
 }
 

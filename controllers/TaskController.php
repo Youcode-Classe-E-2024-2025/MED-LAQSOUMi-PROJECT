@@ -42,9 +42,10 @@ class TaskController {
             $assigned_to = $_POST['assigned_to'];
             $status = $_POST['status'];
             $priority = $_POST['priority'];
+            $category_id = !empty($_POST['category_id']) ? $_POST['category_id'] : null;
             $created_by = $_SESSION['user_id'];
 
-            if ($this->task->create($title, $description, $project_id, $assigned_to, $created_by, $status, $priority)) {
+            if ($this->task->create($title, $description, $project_id, $assigned_to, $created_by, $status, $priority, $category_id)) {
                 $task_id = $this->task->getLastInsertId();
                 
                 // Handle tags
@@ -94,8 +95,8 @@ class TaskController {
             $description = $_POST['description'];
             $status = $_POST['status'];
             $priority = $_POST['priority'];
-            $assigned_to = $_POST['assigned_to'];
-            $category_id = $_POST['category_id'];
+            $assigned_to = !empty($_POST['assigned_to']) ? $_POST['assigned_to'] : null;
+            $category_id = !empty($_POST['category_id']) ? $_POST['category_id'] : null;
 
             if ($this->task->update($id, $title, $description, $status, $priority, $assigned_to, $category_id)) {
                 // Handle tags
@@ -243,7 +244,21 @@ class TaskController {
             $tasks = $this->task->getAssignedTasks($user_id);
         }
     
+        if (!is_array($tasks)) {
+            $tasks = []; // Ensure $tasks is always an array
+        }
+    
         require 'views/task/user_tasks.php';
+    }
+
+    public function task_view($id) {
+        $task = $this->task->getById($id);
+        if (!$task) {
+            setFlashMessage('error', "Task not found.");
+            header('Location: index.php?action=dashboard');
+            exit;
+        }
+        require 'views/task/view.php';
     }
 }
 

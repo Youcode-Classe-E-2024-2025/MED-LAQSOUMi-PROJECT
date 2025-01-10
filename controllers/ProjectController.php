@@ -23,6 +23,11 @@ class ProjectController {
     }
 
     public function project_create() {
+        if ($_SESSION['user_role'] !== 'admin' && $_SESSION['user_role'] !== 'project_manager') {
+            setFlashMessage('error', "You don't have permission to create a project.");
+            header('Location: index.php?action=dashboard');
+            exit;
+        }
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $name = $_POST['name'];
             $description = $_POST['description'];
