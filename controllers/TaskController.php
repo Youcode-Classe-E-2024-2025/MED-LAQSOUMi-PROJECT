@@ -1,11 +1,14 @@
 <?php
-require_once 'models/Task.php';
-require_once 'models/Project.php';
-require_once 'models/User.php';
-require_once 'models/Category.php';
-require_once 'models/Tag.php';
-require_once 'models/Kanban.php';
-require_once 'includes/utils.php';
+
+namespace Controllers;
+
+require_once __DIR__ . '/../models/Task.php';
+require_once __DIR__ . '/../models/Project.php';
+require_once __DIR__ . '/../models/User.php';
+require_once __DIR__ . '/../models/Category.php';
+require_once __DIR__ . '/../models/Tag.php';
+require_once __DIR__ . '/../models/Kanban.php';
+require_once __DIR__ . '/../includes/utils.php';
 
 use Models\Task;
 use Models\Project;
@@ -31,7 +34,7 @@ class TaskController {
         $this->kanban = new Kanban($db);
     }
 
-    public function create() {
+    public function task_create() {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $title = $_POST['title'];
             $description = $_POST['description'];
@@ -71,7 +74,7 @@ class TaskController {
         require 'views/task/create.php';
     }
 
-    public function edit($id) {
+    public function task_edit($id) {
         $task = $this->task->getById($id);
         if (!$task) {
             setFlashMessage('error', "Task not found.");
@@ -117,7 +120,7 @@ class TaskController {
         require 'views/task/edit.php';
     }
 
-    public function delete($id) {
+    public function task_delete($id) {
         $task = $this->task->getById($id);
         if (!$task) {
             setFlashMessage('error', "Task not found.");

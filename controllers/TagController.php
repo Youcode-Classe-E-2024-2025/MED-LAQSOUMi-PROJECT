@@ -1,6 +1,9 @@
 <?php
-require_once 'models/Tag.php';
-require_once 'includes/utils.php';
+
+namespace Controllers;
+
+require_once __DIR__ . '/../models/Tag.php';
+require_once __DIR__ . '/../includes/utils.php';
 
 use Models\Tag;
 

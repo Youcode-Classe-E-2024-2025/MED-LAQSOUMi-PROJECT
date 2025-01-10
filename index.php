@@ -1,11 +1,16 @@
 <?php
 session_start();
-require_once 'config/database.php';
-require_once 'controllers/UserController.php';
-require_once 'controllers/ProjectController.php';
-require_once 'controllers/TaskController.php';
-require_once 'controllers/TagController.php';
-require_once 'includes/utils.php';
+require_once __DIR__ . '/config/database.php';
+require_once __DIR__ . '/controllers/UserController.php';
+require_once __DIR__ . '/controllers/ProjectController.php';
+require_once __DIR__ . '/controllers/TaskController.php';
+require_once __DIR__ . '/controllers/TagController.php';
+require_once __DIR__ . '/includes/utils.php';
+
+use Controllers\UserController;
+use Controllers\ProjectController;
+use Controllers\TaskController;
+use Controllers\TagController;
 
 $db = getDatabaseConnection();
 
@@ -33,7 +38,7 @@ switch ($action) {
     case 'project_edit':
     case 'project_delete':
     case 'project_list':
-        $projectController->$action();
+        $projectController->$action($_GET['id'] ?? null);
         break;
     case 'task_create':
     case 'task_edit':

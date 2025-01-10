@@ -1,8 +1,11 @@
 <?php
-require_once 'models/Project.php';
-require_once 'models/Task.php';
-require_once 'models/Kanban.php';
-require_once 'includes/utils.php';
+
+namespace Controllers;
+
+require_once __DIR__ . '/../models/Project.php';
+require_once __DIR__ . '/../models/Task.php';
+require_once __DIR__ . '/../models/Kanban.php';
+require_once __DIR__ . '/../includes/utils.php';
 
 use Models\Project;
 use Models\Task;
@@ -19,7 +22,7 @@ class ProjectController {
         $this->kanban = new Kanban($db);
     }
 
-    public function create() {
+    public function project_create() {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $name = $_POST['name'];
             $description = $_POST['description'];
@@ -43,7 +46,7 @@ class ProjectController {
         require 'views/project/create.php';
     }
 
-    public function view($id) {
+    public function project_view($id) {
         $project = $this->project->getById($id);
         if (!$project) {
             setFlashMessage('error', "Project not found.");
@@ -59,7 +62,7 @@ class ProjectController {
         require 'views/project/view.php';
     }
 
-    public function edit($id) {
+    public function project_edit($id) {
         $project = $this->project->getById($id);
         if (!$project) {
             setFlashMessage('error', "Project not found.");
@@ -81,7 +84,7 @@ class ProjectController {
         require 'views/project/edit.php';
     }
 
-    public function delete($id) {
+    public function project_delete($id) {
         if ($this->project->delete($id)) {
             setFlashMessage('success', "Project deleted successfully.");
             header('Location: index.php?action=project_list');
