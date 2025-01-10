@@ -1,0 +1,84 @@
+<?php
+namespace Models;
+
+class Project {
+    private $db;
+    private $id;
+    private $name;
+    private $description;
+    private $user_id;
+    private $is_public;
+    private $created_at;
+    private $updated_at;
+
+    public function __construct($db) {
+        $this->db = $db;
+    }
+
+    public function create($name, $description, $user_id, $is_public = false) {
+        $query = "INSERT INTO projects (name, description, user_id, is_public) VALUES (?, ?, ?, ?)";
+        $stmt = $this->db->prepare($query);
+        return $stmt->execute([$name, $description, $user_id, $is_public]);
+    }
+
+    public function getByUserId($user_id) {
+        $query = "SELECT * FROM projects WHERE user_id = ?";
+        $stmt = $this->db->prepare($query);
+        $stmt->execute([$user_id]);
+        return $stmt->fetchAll(\PDO::FETCH_ASSOC);
+    }
+
+    public function getById($id) {
+        $query = "SELECT * FROM projects WHERE id = ?";
+        $stmt = $this->db->prepare($query);
+        $stmt->execute([$id]);
+        return $stmt->fetch(\PDO::FETCH_ASSOC);
+    }
+
+    public function update($id, $name, $description, $is_public) {
+        $query = "UPDATE projects SET name = ?, description = ?, is_public = ? WHERE id = ?";
+        $stmt = $this->db->prepare($query);
+        return $stmt->execute([$name, $description, $is_public, $id]);
+    }
+
+    public function delete($id) {
+        $query = "DELETE FROM projects WHERE id = ?";
+        $stmt = $this->db->prepare($query);
+        return $stmt->execute([$id]);
+    }
+
+    public function getPublicProjects() {
+        $query = "SELECT * FROM projects WHERE is_public = 1";
+        $stmt = $this->db->prepare($query);
+        $stmt->execute();
+        return $stmt->fetchAll(\PDO::FETCH_ASSOC);
+    }
+
+    public function getAll() {
+        $query = "SELECT * FROM projects";
+        $stmt = $this->db->prepare($query);
+        $stmt->execute();
+        return $stmt->fetchAll(\PDO::FETCH_ASSOC);
+    }
+
+    public function getAssignedAndPublicProjects($user_id) {
+        $query = "SELECT DISTINCT p.* FROM projects p 
+                  LEFT JOIN tasks t ON p.id = t.project_id 
+                  WHERE p.is_public = 1 OR t.assigned_to = ? OR p.user_id = ?";
+        $stmt = $this->db->prepare($query);
+        $stmt->execute([$user_id, $user_id]);
+        return $stmt->fetchAll(\PDO::FETCH_ASSOC);
+    }
+
+    // Getters and setters
+    public function getId() { return $this->id; }
+    public function getName() { return $this->name; }
+    public function setName($name) { $this->name = $name; }
+    public function getDescription() { return $this->description; }
+    public function setDescription($description) { $this->description = $description; }
+    public function getUserId() { return $this->user_id; }
+    public function setUserId($user_id) { $this->user_id = $user_id; }
+    public function getIsPublic() { return $this->is_public; }
+    public function setIsPublic($is_public) { $this->is_public = $is_public; }
+}
+
