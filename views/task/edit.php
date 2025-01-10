@@ -40,6 +40,16 @@
             <?php endforeach; ?>
         </select>
     </div>
+
+    <div class="form-group">
+        <label for="category_id">Category:</label>
+        <select id="category_id" name="category_id" class="form-control">
+            <option value="">No Category</option>
+            <?php foreach ($categories as $category): ?>
+                <option value="<?php echo $category['id']; ?>" <?php echo $task['category_id'] == $category['id'] ? 'selected' : ''; ?>><?php echo htmlspecialchars($category['name']); ?></option>
+            <?php endforeach; ?>
+        </select>
+    </div>
     
     <div class="form-group">
         <label>Tags:</label>

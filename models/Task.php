@@ -22,16 +22,16 @@ class Task {
     }
 
     public function getById($id) {
-        $query = "SELECT * FROM tasks WHERE id = ?";
+        $query = "SELECT t.*, c.name as category_name FROM tasks t LEFT JOIN categories c ON t.category_id = c.id WHERE t.id = ?";
         $stmt = $this->db->prepare($query);
         $stmt->execute([$id]);
         return $stmt->fetch(\PDO::FETCH_ASSOC);
     }
 
-    public function update($id, $title, $description, $status, $priority, $assigned_to) {
-        $query = "UPDATE tasks SET title = ?, description = ?, status = ?, priority = ?, assigned_to = ? WHERE id = ?";
+    public function update($id, $title, $description, $status, $priority, $assigned_to, $category_id) {
+        $query = "UPDATE tasks SET title = ?, description = ?, status = ?, priority = ?, assigned_to = ?, category_id = ? WHERE id = ?";
         $stmt = $this->db->prepare($query);
-        return $stmt->execute([$title, $description, $status, $priority, $assigned_to, $id]);
+        return $stmt->execute([$title, $description, $status, $priority, $assigned_to, $category_id, $id]);
     }
 
     public function delete($id) {

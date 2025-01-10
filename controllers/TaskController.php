@@ -83,7 +83,7 @@ class TaskController {
         }
 
         $project = $this->project->getById($task['project_id']);
-        if (!$project || ($project['user_id'] != $_SESSION['user_id'] && $_SESSION['user_role'] != 'project_manager')) {
+        if (!$project || ($_SESSION['user_role'] !== 'admin' && $project['user_id'] != $_SESSION['user_id'] && $_SESSION['user_role'] !== 'project_manager')) {
             setFlashMessage('error', "You don't have permission to edit this task.");
             header('Location: index.php?action=project_list');
             exit;
@@ -95,8 +95,9 @@ class TaskController {
             $status = $_POST['status'];
             $priority = $_POST['priority'];
             $assigned_to = $_POST['assigned_to'];
+            $category_id = $_POST['category_id'];
 
-            if ($this->task->update($id, $title, $description, $status, $priority, $assigned_to)) {
+            if ($this->task->update($id, $title, $description, $status, $priority, $assigned_to, $category_id)) {
                 // Handle tags
                 $this->tag->removeAllFromTask($id);
                 if (isset($_POST['tags'])) {
